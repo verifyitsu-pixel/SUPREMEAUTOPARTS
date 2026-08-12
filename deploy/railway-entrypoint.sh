@@ -8,6 +8,14 @@ export WORDPRESS_DB_PASSWORD="${WORDPRESS_DB_PASSWORD:-${MYSQLPASSWORD:-}}"
 export WORDPRESS_DB_NAME="${WORDPRESS_DB_NAME:-${MYSQLDATABASE:-railway}}"
 export WORDPRESS_TABLE_PREFIX="${WORDPRESS_TABLE_PREFIX:-wp_}"
 
+# Railway's private MySQL endpoint uses the standard 3306 port. WordPress/wpdb
+# accepts host:port in most environments, but PHP's mysqlnd can interpret that
+# combined value inconsistently during early bootstrap. Use the proven private
+# hostname directly when Railway supplies the default port.
+if [[ "$WORDPRESS_DB_HOST" =~ ^([^:]+):3306$ ]]; then
+  export WORDPRESS_DB_HOST="${BASH_REMATCH[1]}"
+fi
+
 # Railway routes health checks and public traffic to the injected runtime port.
 # The upstream WordPress image defaults Apache to port 80, so update both the
 # listener and virtual host before handing off to its official entrypoint.
