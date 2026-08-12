@@ -34,7 +34,8 @@ fi
 # runtime database adapter explicitly on every boot.
 mkdir -p /var/www/html/wp-content
 install -m 0644 /usr/src/wordpress/wp-content/db.php /var/www/html/wp-content/db.php
-chown www-data:www-data /var/www/html/wp-content/db.php
+install -m 0644 /usr/src/wordpress/wp-content/db-error.php /var/www/html/wp-content/db-error.php
+chown www-data:www-data /var/www/html/wp-content/db.php /var/www/html/wp-content/db-error.php
 
 # Finish WordPress/WooCommerce configuration after the official entrypoint has
 # created wp-config.php and Apache is accepting traffic.

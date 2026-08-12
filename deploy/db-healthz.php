@@ -98,5 +98,13 @@ if ( false !== $runtime_probe ) {
 	}
 }
 
+$failure_probe = @file_get_contents( '/tmp/supreme-wpdb-failure.json' );
+if ( false !== $failure_probe ) {
+	$failure_probe = json_decode( $failure_probe, true );
+	if ( is_array( $failure_probe ) ) {
+		$response['wordpress_failure'] = $failure_probe;
+	}
+}
+
 http_response_code( 'ok' === $response['status'] ? 200 : 503 );
 echo json_encode( $response, JSON_UNESCAPED_SLASHES );
