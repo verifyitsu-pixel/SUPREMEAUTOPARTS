@@ -48,6 +48,11 @@ final class Supreme_Railway_WPDB extends wpdb {
 		$this->dbname     = $dbname;
 		$this->dbhost     = $dbhost;
 		$connected = $this->db_connect( false );
+		if ( $connected && $this->ready && 0 === mysqli_connect_errno() ) {
+			// A failed early Railway readiness attempt can leave wpdb->error set
+			// even after the subsequent connection and database selection succeed.
+			$this->error = null;
+		}
 		$this->write_runtime_probe(
 			array(
 				'loaded'        => true,
