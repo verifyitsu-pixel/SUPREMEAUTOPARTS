@@ -31,11 +31,28 @@ if ( $response['configuration_set'] && $response['password_set'] ) {
 	mysqli_report( MYSQLI_REPORT_OFF );
 	$connection = @new mysqli( $host, $user, $password, $database, $port );
 	if ( 0 === $connection->connect_errno ) {
-		$response['status'] = 'ok';
+		$response['query_ok'] = false !== $connection->query( 'SELECT 1' );
+		$tables = $connection->query( 'SHOW TABLES' );
+		$response['table_count'] = $tables instanceof mysqli_result ? $tables->num_rows : -1;
+		$prefix = preg_replace( '/[^A-Za-z0-9_]/', '', (string) ( getenv( 'WORDPRESS_TABLE_PREFIX' ) ?: 'wp_' ) );
+		$options = $connection->query( "SHOW TABLES LIKE '" . $connection->real_escape_string( $prefix . 'options' ) . "'" );
+		$response['options_table'] = $options instanceof mysqli_result && 1 === $options->num_rows;
+		$response['status'] = $response['query_ok'] ? 'ok' : 'unavailable';
 		$connection->close();
 	} else {
 		// The numeric code is enough to distinguish DNS/network/auth/database failures.
 		$response['error_code'] = (int) $connection->connect_errno;
+	}
+}
+
+// Match the exact host form WordPress receives so mysqlnd parsing differences
+// are visible without exposing the hostname or credentials.
+if ( $response['configuration_set'] && $response['password_set'] ) {
+	$raw_connection = @new mysqli( $host_value, $user, $password, $database );
+	$response['raw_host_error_code'] = (int) $raw_connection->connect_errno;
+	if ( 0 === $raw_connection->connect_errno ) {
+		$response['raw_host_query_ok'] = false !== $raw_connection->query( 'SELECT 1' );
+		$raw_connection->close();
 	}
 }
 
