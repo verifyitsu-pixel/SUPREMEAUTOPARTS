@@ -8,6 +8,18 @@ $probe = array(
 	'class'               => is_object( $wpdb ) ? get_class( $wpdb ) : 'none',
 	'ready'               => is_object( $wpdb ) && ! empty( $wpdb->ready ),
 	'error_code'          => (int) mysqli_connect_errno(),
+	'error_set'           => is_object( $wpdb ) && ! empty( $wpdb->error ),
+	'error_type'          => is_object( $wpdb ) && is_object( $wpdb->error ) ? get_class( $wpdb->error ) : gettype( is_object( $wpdb ) ? $wpdb->error : null ),
+	'error_hash'          => is_object( $wpdb ) && ! is_object( $wpdb->error ) ? hash( 'sha256', (string) $wpdb->error ) : '',
+	'last_error_set'      => is_object( $wpdb ) && '' !== (string) $wpdb->last_error,
+	'last_error_hash'     => is_object( $wpdb ) ? hash( 'sha256', (string) $wpdb->last_error ) : '',
+);
+
+$probe['trace'] = array_map(
+	static function ( $frame ) {
+		return ( isset( $frame['class'] ) ? $frame['class'] . ( $frame['type'] ?? '' ) : '' ) . ( $frame['function'] ?? 'unknown' );
+	},
+	array_slice( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ), 0, 10 )
 );
 
 if ( is_object( $wpdb ) ) {
