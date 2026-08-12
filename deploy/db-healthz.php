@@ -25,6 +25,13 @@ $response = array(
 	'status'            => 'unavailable',
 	'configuration_set' => '' !== $host && '' !== $user && '' !== $database,
 	'password_set'      => '' !== $password,
+	'config_file_exists' => file_exists( __DIR__ . '/wp-config.php' ),
+	'file_overrides_set' => array(
+		'host'     => false !== getenv( 'WORDPRESS_DB_HOST_FILE' ),
+		'user'     => false !== getenv( 'WORDPRESS_DB_USER_FILE' ),
+		'password' => false !== getenv( 'WORDPRESS_DB_PASSWORD_FILE' ),
+		'name'     => false !== getenv( 'WORDPRESS_DB_NAME_FILE' ),
+	),
 );
 
 if ( $response['configuration_set'] && $response['password_set'] ) {
@@ -54,6 +61,28 @@ if ( $response['configuration_set'] && $response['password_set'] ) {
 		$response['raw_host_query_ok'] = false !== $raw_connection->query( 'SELECT 1' );
 		$raw_connection->close();
 	}
+}
+
+// Mirror wpdb::db_connect(): initialize, connect without selecting a database,
+// then select it. This catches differences hidden by new mysqli(..., $database).
+if ( $response['configuration_set'] && $response['password_set'] ) {
+	$wpdb_connection = mysqli_init();
+	$wpdb_connected  = @mysqli_real_connect( $wpdb_connection, $host, $user, $password, null, $port, null, 0 );
+	$response['wpdb_style_connect_ok'] = (bool) $wpdb_connected;
+	$response['wpdb_style_error_code'] = (int) mysqli_connect_errno();
+	if ( $wpdb_connected ) {
+		$response['wpdb_style_select_ok'] = @mysqli_select_db( $wpdb_connection, $database );
+		$response['wpdb_style_query_ok']  = false !== @$wpdb_connection->query( 'SELECT option_value FROM `' . $prefix . "options` WHERE option_name = 'siteurl' LIMIT 1" );
+		$wpdb_connection->close();
+	}
+}
+
+// Identify whether the generated container config is still the official
+// environment-driven file, without returning its contents or any secret.
+if ( $response['config_file_exists'] ) {
+	$config = (string) @file_get_contents( __DIR__ . '/wp-config.php' );
+	$response['config_uses_environment'] = false !== strpos( $config, 'getenv_docker' );
+	$response['config_defines_db']       = false !== strpos( $config, "define( 'DB_HOST'" );
 }
 
 http_response_code( 'ok' === $response['status'] ? 200 : 503 );
