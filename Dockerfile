@@ -19,6 +19,7 @@ COPY wp-content/plugins/supreme-autoparts-core/ /usr/src/wordpress/wp-content/pl
 COPY wp-content/mu-plugins/ /usr/src/wordpress/wp-content/mu-plugins/
 COPY data/products.csv data/vehicle-hierarchy.json /opt/supreme/data/
 COPY deploy/healthz.php /usr/src/wordpress/healthz.php
+COPY deploy/db-healthz.php /usr/src/wordpress/db-healthz.php
 COPY deploy/railway-entrypoint.sh /usr/local/bin/railway-entrypoint
 COPY deploy/supreme-bootstrap.sh /usr/local/bin/supreme-bootstrap
 COPY deploy/apache-security.conf /etc/apache2/conf-available/supreme-security.conf

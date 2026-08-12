@@ -6,6 +6,7 @@ cd /var/www/html
 # Apache and the official WordPress entrypoint create wp-config.php at runtime.
 # Wait for both that file and MySQL before performing the idempotent site setup.
 for attempt in $(seq 1 90); do
+  export SUPREME_DB_ATTEMPT="$attempt"
   if [[ -f wp-config.php ]] && php -r '
     $host = getenv("WORDPRESS_DB_HOST") ?: "";
     $user = getenv("WORDPRESS_DB_USER") ?: "";
@@ -13,7 +14,13 @@ for attempt in $(seq 1 90); do
     $name = getenv("WORDPRESS_DB_NAME") ?: "";
     mysqli_report(MYSQLI_REPORT_OFF);
     $db = @new mysqli($host, $user, $pass, $name);
-    exit($db->connect_errno ? 1 : 0);
+    if ($db->connect_errno) {
+      if (((int) getenv("SUPREME_DB_ATTEMPT")) % 15 === 0) {
+        fwrite(STDERR, "Supreme bootstrap: database connection code " . $db->connect_errno . ".\n");
+      }
+      exit(1);
+    }
+    exit(0);
   '; then
     break
   fi
