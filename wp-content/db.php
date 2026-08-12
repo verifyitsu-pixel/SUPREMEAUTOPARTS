@@ -87,4 +87,12 @@ final class Supreme_Railway_WPDB extends wpdb {
 
 $wpdb = new Supreme_Railway_WPDB( $sa_db_user, $sa_db_password, $sa_db_name, $sa_db_host );
 
-unset( $sa_db_user, $sa_db_password, $sa_db_name, $sa_db_host );
+// WordPress checks wpdb->error immediately after this drop-in returns. Confirm
+// the live handle at that boundary and discard only a stale bootstrap error.
+$sa_connection_probe = $wpdb->get_var( 'SELECT 1' );
+if ( '1' === (string) $sa_connection_probe && '' === (string) $wpdb->last_error ) {
+	$wpdb->error = null;
+	$wpdb->ready = true;
+}
+
+unset( $sa_db_user, $sa_db_password, $sa_db_name, $sa_db_host, $sa_connection_probe );
