@@ -17,6 +17,7 @@ RUN set -eux; \
 COPY wp-content/themes/supreme-autoparts/ /usr/src/wordpress/wp-content/themes/supreme-autoparts/
 COPY wp-content/plugins/supreme-autoparts-core/ /usr/src/wordpress/wp-content/plugins/supreme-autoparts-core/
 COPY wp-content/mu-plugins/ /usr/src/wordpress/wp-content/mu-plugins/
+COPY wp-content/db.php /usr/src/wordpress/wp-content/db.php
 COPY data/products.csv data/vehicle-hierarchy.json /opt/supreme/data/
 COPY deploy/healthz.php /usr/src/wordpress/healthz.php
 COPY deploy/db-healthz.php /usr/src/wordpress/db-healthz.php
