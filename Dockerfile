@@ -23,7 +23,8 @@ COPY deploy/railway-entrypoint.sh /usr/local/bin/railway-entrypoint
 COPY deploy/supreme-bootstrap.sh /usr/local/bin/supreme-bootstrap
 COPY deploy/apache-security.conf /etc/apache2/conf-available/supreme-security.conf
 
-RUN chmod +x /usr/local/bin/railway-entrypoint /usr/local/bin/supreme-bootstrap \
+RUN sed -i 's/\r$//' /usr/local/bin/railway-entrypoint /usr/local/bin/supreme-bootstrap \
+    && chmod +x /usr/local/bin/railway-entrypoint /usr/local/bin/supreme-bootstrap \
     && a2enconf supreme-security \
     && chown -R www-data:www-data /usr/src/wordpress/wp-content
 
