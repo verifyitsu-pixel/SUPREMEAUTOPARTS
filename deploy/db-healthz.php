@@ -90,5 +90,13 @@ if ( $response['config_file_exists'] ) {
 	$response['config_has_setup_guard']  = false !== strpos( $config, 'WP_SETUP_CONFIG' );
 }
 
+$runtime_probe = @file_get_contents( '/tmp/supreme-wpdb-runtime.json' );
+if ( false !== $runtime_probe ) {
+	$runtime_probe = json_decode( $runtime_probe, true );
+	if ( is_array( $runtime_probe ) ) {
+		$response['wordpress_runtime'] = $runtime_probe;
+	}
+}
+
 http_response_code( 'ok' === $response['status'] ? 200 : 503 );
 echo json_encode( $response, JSON_UNESCAPED_SLASHES );

@@ -38,7 +38,20 @@ final class Supreme_Railway_WPDB extends wpdb {
 		$this->dbpassword = $dbpassword;
 		$this->dbname     = $dbname;
 		$this->dbhost     = $dbhost;
-		$this->db_connect();
+		$connected = $this->db_connect( false );
+		@file_put_contents(
+			'/tmp/supreme-wpdb-runtime.json',
+			json_encode(
+				array(
+					'loaded'        => true,
+					'connected'     => (bool) $connected,
+					'ready'         => (bool) $this->ready,
+					'error_code'    => (int) mysqli_connect_errno(),
+					'host_has_port' => 1 === substr_count( $dbhost, ':' ),
+				),
+				JSON_UNESCAPED_SLASHES
+			)
+		);
 	}
 }
 
