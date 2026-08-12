@@ -87,6 +87,7 @@ if ( $response['config_file_exists'] ) {
 	$config = (string) @file_get_contents( __DIR__ . '/wp-config.php' );
 	$response['config_uses_environment'] = false !== strpos( $config, 'getenv_docker' );
 	$response['config_defines_db']       = false !== strpos( $config, "define( 'DB_HOST'" );
+	$response['config_has_setup_guard']  = false !== strpos( $config, 'WP_SETUP_CONFIG' );
 }
 
 http_response_code( 'ok' === $response['status'] ? 200 : 503 );

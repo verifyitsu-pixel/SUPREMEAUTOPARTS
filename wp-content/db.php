@@ -28,6 +28,20 @@ if ( '' === $sa_db_host && defined( 'DB_HOST' ) ) {
 	$sa_db_host = DB_HOST;
 }
 
-$wpdb = new wpdb( $sa_db_user, $sa_db_password, $sa_db_name, $sa_db_host );
+/**
+ * Initialize wpdb even if a retained wp-config.php contains the temporary
+ * WP_SETUP_CONFIG flag. Core's constructor otherwise returns before connecting.
+ */
+final class Supreme_Railway_WPDB extends wpdb {
+	public function __construct( $dbuser, #[\SensitiveParameter] $dbpassword, $dbname, $dbhost ) {
+		$this->dbuser     = $dbuser;
+		$this->dbpassword = $dbpassword;
+		$this->dbname     = $dbname;
+		$this->dbhost     = $dbhost;
+		$this->db_connect();
+	}
+}
+
+$wpdb = new Supreme_Railway_WPDB( $sa_db_user, $sa_db_password, $sa_db_name, $sa_db_host );
 
 unset( $sa_db_user, $sa_db_password, $sa_db_name, $sa_db_host );
