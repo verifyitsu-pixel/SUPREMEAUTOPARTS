@@ -31,6 +31,36 @@ for attempt in $(seq 1 90); do
   sleep 2
 done
 
+# Recover an interrupted first installation without deleting any data. Core
+# tables may already exist while the required URL options are absent, a state
+# in which WordPress intentionally blocks both HTTP and WP-CLI startup.
+php -r '
+  $host = (string) getenv("WORDPRESS_DB_HOST");
+  $user = (string) getenv("WORDPRESS_DB_USER");
+  $pass = (string) getenv("WORDPRESS_DB_PASSWORD");
+  $name = (string) getenv("WORDPRESS_DB_NAME");
+  $prefix = preg_replace("/[^A-Za-z0-9_]/", "", (string) (getenv("WORDPRESS_TABLE_PREFIX") ?: "wp_"));
+  $url = (string) (getenv("WP_HOME") ?: (getenv("RAILWAY_PUBLIC_DOMAIN") ? "https://" . getenv("RAILWAY_PUBLIC_DOMAIN") : "http://localhost"));
+  mysqli_report(MYSQLI_REPORT_OFF);
+  $db = @new mysqli($host, $user, $pass, $name);
+  if ($db->connect_errno) {
+    exit(1);
+  }
+  foreach (["siteurl", "home"] as $option) {
+    $sql = "INSERT INTO `{$prefix}options` (option_name, option_value, autoload) VALUES (?, ?, \"yes\") ON DUPLICATE KEY UPDATE option_value = IF(option_value = \"\", VALUES(option_value), option_value)";
+    $statement = $db->prepare($sql);
+    if (!$statement) {
+      exit(1);
+    }
+    $statement->bind_param("ss", $option, $url);
+    if (!$statement->execute()) {
+      exit(1);
+    }
+    $statement->close();
+  }
+  $db->close();
+'
+
 wp_cmd=(wp --allow-root --path=/var/www/html)
 
 if ! "${wp_cmd[@]}" core is-installed >/dev/null 2>&1; then
