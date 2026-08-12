@@ -48,6 +48,19 @@ if ( $response['configuration_set'] && $response['password_set'] ) {
 		$prefix = preg_replace( '/[^A-Za-z0-9_]/', '', (string) ( getenv( 'WORDPRESS_TABLE_PREFIX' ) ?: 'wp_' ) );
 		$options = $connection->query( "SHOW TABLES LIKE '" . $connection->real_escape_string( $prefix . 'options' ) . "'" );
 		$response['options_table'] = $options instanceof mysqli_result && 1 === $options->num_rows;
+		if ( $response['options_table'] ) {
+			$option_count = $connection->query( 'SELECT COUNT(*) AS total FROM `' . $prefix . 'options`' );
+			$option_row = $option_count instanceof mysqli_result ? $option_count->fetch_assoc() : array();
+			$response['options_row_count'] = isset( $option_row['total'] ) ? (int) $option_row['total'] : -1;
+			$siteurl = $connection->query( "SELECT option_value FROM `{$prefix}options` WHERE option_name = 'siteurl' LIMIT 1" );
+			$siteurl_row = $siteurl instanceof mysqli_result ? $siteurl->fetch_assoc() : null;
+			$response['siteurl_present'] = is_array( $siteurl_row ) && '' !== (string) ( $siteurl_row['option_value'] ?? '' );
+		}
+		foreach ( array( 'users', 'posts' ) as $core_table ) {
+			$count_result = $connection->query( 'SELECT COUNT(*) AS total FROM `' . $prefix . $core_table . '`' );
+			$count_row = $count_result instanceof mysqli_result ? $count_result->fetch_assoc() : array();
+			$response[ $core_table . '_row_count' ] = isset( $count_row['total'] ) ? (int) $count_row['total'] : -1;
+		}
 		$response['status'] = $response['query_ok'] ? 'ok' : 'unavailable';
 		$connection->close();
 	} else {
