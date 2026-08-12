@@ -33,25 +33,50 @@ if ( '' === $sa_db_host && defined( 'DB_HOST' ) ) {
  * WP_SETUP_CONFIG flag. Core's constructor otherwise returns before connecting.
  */
 final class Supreme_Railway_WPDB extends wpdb {
+	private function write_runtime_probe( array $values ) {
+		$current = json_decode( (string) @file_get_contents( '/tmp/supreme-wpdb-runtime.json' ), true );
+		$current = is_array( $current ) ? $current : array();
+		@file_put_contents(
+			'/tmp/supreme-wpdb-runtime.json',
+			json_encode( array_merge( $current, $values ), JSON_UNESCAPED_SLASHES )
+		);
+	}
+
 	public function __construct( $dbuser, #[\SensitiveParameter] $dbpassword, $dbname, $dbhost ) {
 		$this->dbuser     = $dbuser;
 		$this->dbpassword = $dbpassword;
 		$this->dbname     = $dbname;
 		$this->dbhost     = $dbhost;
 		$connected = $this->db_connect( false );
-		@file_put_contents(
-			'/tmp/supreme-wpdb-runtime.json',
-			json_encode(
-				array(
-					'loaded'        => true,
-					'connected'     => (bool) $connected,
-					'ready'         => (bool) $this->ready,
-					'error_code'    => (int) mysqli_connect_errno(),
-					'host_has_port' => 1 === substr_count( $dbhost, ':' ),
-				),
-				JSON_UNESCAPED_SLASHES
+		$this->write_runtime_probe(
+			array(
+				'loaded'        => true,
+				'connected'     => (bool) $connected,
+				'ready'         => (bool) $this->ready,
+				'error_code'    => (int) mysqli_connect_errno(),
+				'host_has_port' => 1 === substr_count( $dbhost, ':' ),
 			)
 		);
+	}
+
+	public function query( $query ) {
+		$result = parent::query( $query );
+		if ( false === $result || '' !== (string) $this->last_error ) {
+			$operation = 'unknown';
+			if ( preg_match( '/^\s*([a-z]+)/i', (string) $query, $matches ) ) {
+				$operation = strtolower( $matches[1] );
+			}
+			$this->write_runtime_probe(
+				array(
+					'query_failure' => array(
+						'operation'  => $operation,
+						'error_code' => $this->dbh instanceof mysqli ? (int) mysqli_errno( $this->dbh ) : 0,
+						'error_hash' => hash( 'sha256', (string) $this->last_error ),
+					),
+				)
+			);
+		}
+		return $result;
 	}
 }
 
