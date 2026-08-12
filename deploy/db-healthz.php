@@ -26,6 +26,10 @@ $response = array(
 	'configuration_set' => '' !== $host && '' !== $user && '' !== $database,
 	'password_set'      => '' !== $password,
 	'config_file_exists' => file_exists( __DIR__ . '/wp-config.php' ),
+	'db_dropin_exists'   => file_exists( __DIR__ . '/wp-content/db.php' ),
+	'db_dropin_current'  => file_exists( __DIR__ . '/wp-content/db.php' )
+		&& file_exists( '/usr/src/wordpress/wp-content/db.php' )
+		&& hash_file( 'sha256', __DIR__ . '/wp-content/db.php' ) === hash_file( 'sha256', '/usr/src/wordpress/wp-content/db.php' ),
 	'file_overrides_set' => array(
 		'host'     => false !== getenv( 'WORDPRESS_DB_HOST_FILE' ),
 		'user'     => false !== getenv( 'WORDPRESS_DB_USER_FILE' ),

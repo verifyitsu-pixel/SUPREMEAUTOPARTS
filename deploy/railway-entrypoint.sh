@@ -37,6 +37,13 @@ if [[ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]]; then
   export WP_SITEURL="${WP_SITEURL:-https://${RAILWAY_PUBLIC_DOMAIN}}"
 fi
 
+# The official image only seeds WordPress when the target directory is empty.
+# Railway can retain an initialized target between releases, so install the
+# runtime database adapter explicitly on every boot.
+mkdir -p /var/www/html/wp-content
+install -m 0644 /usr/src/wordpress/wp-content/db.php /var/www/html/wp-content/db.php
+chown www-data:www-data /var/www/html/wp-content/db.php
+
 # Finish WordPress/WooCommerce configuration after the official entrypoint has
 # created wp-config.php and Apache is accepting traffic.
 /usr/local/bin/supreme-bootstrap &
