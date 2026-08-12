@@ -29,6 +29,10 @@ if [[ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]]; then
   export WP_SITEURL="${WP_SITEURL:-https://${RAILWAY_PUBLIC_DOMAIN}}"
 fi
 
+# Finish WordPress/WooCommerce configuration after the official entrypoint has
+# created wp-config.php and Apache is accepting traffic.
+/usr/local/bin/supreme-bootstrap &
+
 # Persist uploads on an optional Railway volume, while keeping code immutable.
 if [[ "${RAILWAY_VOLUME_MOUNT_PATH:-}" == "/var/www/html/wp-content/uploads" ]]; then
   mkdir -p /var/www/html/wp-content/uploads

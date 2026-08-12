@@ -5,10 +5,10 @@ final class SA_Brand {
 	private const DEFAULTS = array(
 		'name'        => 'Supreme Autoparts',
 		'tagline'     => 'Parts that fit. Built to perform.',
-		'phone'       => '1-800-555-PART',
-		'email'       => 'support@supremeautoparts.com',
-		'hours'       => 'Mon–Fri, 9am–6pm PT',
-		'address'     => 'United States',
+		'phone'       => '+254 714 498 451',
+		'email'       => 'support@supremeautoparts.co.ke',
+		'hours'       => 'Mon–Sat, 8am–6pm EAT',
+		'address'     => 'Midax Plaza, Off Kangundo Rd, Nairobi, Kenya',
 		'site_url'    => 'https://supremeautoparts.com',
 		'free_ship'   => 99,
 	);

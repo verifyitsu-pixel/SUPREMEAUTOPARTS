@@ -9,6 +9,9 @@ RUN set -eux; \
     curl -fsSL --retry 4 --retry-delay 3 "https://downloads.wordpress.org/plugin/woocommerce.${WOOCOMMERCE_VERSION}.zip" -o /tmp/woocommerce.zip; \
     unzip -q /tmp/woocommerce.zip -d /usr/src/wordpress/wp-content/plugins/; \
     rm /tmp/woocommerce.zip; \
+    curl -fsSL --retry 4 --retry-delay 3 "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" -o /usr/local/bin/wp; \
+    chmod +x /usr/local/bin/wp; \
+    wp --allow-root --info; \
     a2enmod expires headers rewrite remoteip
 
 COPY wp-content/themes/supreme-autoparts/ /usr/src/wordpress/wp-content/themes/supreme-autoparts/
@@ -17,9 +20,10 @@ COPY wp-content/mu-plugins/ /usr/src/wordpress/wp-content/mu-plugins/
 COPY data/products.csv data/vehicle-hierarchy.json /opt/supreme/data/
 COPY deploy/healthz.php /usr/src/wordpress/healthz.php
 COPY deploy/railway-entrypoint.sh /usr/local/bin/railway-entrypoint
+COPY deploy/supreme-bootstrap.sh /usr/local/bin/supreme-bootstrap
 COPY deploy/apache-security.conf /etc/apache2/conf-available/supreme-security.conf
 
-RUN chmod +x /usr/local/bin/railway-entrypoint \
+RUN chmod +x /usr/local/bin/railway-entrypoint /usr/local/bin/supreme-bootstrap \
     && a2enconf supreme-security \
     && chown -R www-data:www-data /usr/src/wordpress/wp-content
 

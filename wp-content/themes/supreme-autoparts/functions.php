@@ -26,7 +26,7 @@ function sa_assets(): void {
 add_action( 'wp_enqueue_scripts', 'sa_assets' );
 
 function sa_brand( string $key ): mixed {
-	return class_exists( 'SA_Brand' ) ? SA_Brand::get( $key ) : array( 'name' => 'Supreme Autoparts', 'tagline' => 'Parts that fit. Built to perform.', 'phone' => '1-800-555-PART', 'email' => 'support@supremeautoparts.com', 'hours' => 'Mon–Fri, 9am–6pm PT', 'free_ship' => 99 )[ $key ] ?? '';
+	return class_exists( 'SA_Brand' ) ? SA_Brand::get( $key ) : array( 'name' => 'Supreme Autoparts', 'tagline' => 'Parts that fit. Built to perform.', 'phone' => '+254 714 498 451', 'email' => 'support@supremeautoparts.co.ke', 'hours' => 'Mon–Sat, 8am–6pm EAT', 'address' => 'Midax Plaza, Off Kangundo Rd, Nairobi, Kenya', 'free_ship' => 99 )[ $key ] ?? '';
 }
 
 function sa_cart_count(): int { return function_exists( 'WC' ) && WC()->cart ? WC()->cart->get_cart_contents_count() : 0; }

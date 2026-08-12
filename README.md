@@ -5,7 +5,7 @@ A production-oriented WordPress/WooCommerce implementation for Supreme Autoparts
 ## What is included
 
 - Custom responsive WooCommerce theme with product search, category/catalog pages, product pages, cart, checkout, My Account, orders, editorial pages, accessibility handling, schema, and mobile navigation.
-- Companion plugin for centralized branding, year/make/model taxonomies, vehicle-filtered catalog queries, local garage UX, product fitment, REST search, gateway abstraction, and WP-CLI imports.
+- Companion plugin for centralized branding, year/make/model taxonomies, vehicle-filtered catalog queries, local garage UX, product fitment, REST search, PesaPal/TransactPay adapters, local-currency estimates, and WP-CLI imports.
 - Public crawl inventories under `/data`: 17,529 products, 10,636 vehicle URLs, 280 category entries, 19 brands, 28,475 route records, assets, redirects, and vehicle hierarchy.
 - Reproducible, rate-limited crawler and inventory builder under `/scripts`.
 - Railway Docker deployment based on WordPress 6.9.1, PHP 8.3, Apache, and pinned WooCommerce 10.8.1.
@@ -19,9 +19,9 @@ A production-oriented WordPress/WooCommerce implementation for Supreme Autoparts
 4. Generate a public domain. `WP_HOME` and `WP_SITEURL` can reference `${{RAILWAY_PUBLIC_DOMAIN}}` or are inferred automatically by the entrypoint.
 5. Add a Railway volume mounted at `/var/www/html/wp-content/uploads`. The database uses Railway-managed persistence and does not need a web-service volume.
 6. Deploy. The configured health check is `/healthz.php`.
-7. Finish the normal WordPress installer, then activate `WooCommerce`, `Supreme Autoparts Core`, and the `Supreme Autoparts` theme.
-8. Run `wp supreme catalog setup` from a Railway shell or one-off command to create editable pages, routes, and categories.
-9. Configure shipping, taxes, email delivery, and at least one payment gateway in WooCommerce before accepting orders.
+7. The idempotent container bootstrap installs WordPress when needed, activates WooCommerce/theme/plugin, creates editable pages, and keeps the configured administrator identity synchronized.
+8. Set PesaPal and/or TransactPay credentials in Railway. A gateway is invisible until all required credentials exist; start in sandbox mode.
+9. Configure shipping, taxes, and transactional email before accepting orders.
 
 Railway builds from GitHub on each push to the connected branch. The container maps Railway's `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, and `MYSQLDATABASE` automatically when explicit `WORDPRESS_DB_*` values are not present.
 
@@ -53,7 +53,8 @@ pnpm preview
 
 - WooCommerce is the system of record for products, inventory, cart sessions, customers, orders, coupons, taxes, shipping, and payments.
 - The companion plugin declares HPOS and Cart/Checkout block compatibility and uses WooCommerce product CRUD.
-- Install only supported gateway plugins and test authorization, capture, refund, webhook, and failure flows in staging before enabling live mode.
+- PesaPal uses API 3.0 token/order/status endpoints; TransactPay uses encrypted hosted-order creation. Test authorization, callback/webhook, failure, cancellation, and refund flows with merchant sandbox credentials before enabling live mode.
+- Customer-facing local prices are cached informational FX estimates selected from WooCommerce geolocation. The cart, order ledger, and provider requests always remain USD.
 - Configure an external transactional email provider; the base WordPress Docker image does not provide a mail transport.
 - Schedule Railway MySQL backups and volume backups. Rebuild regularly for WordPress/PHP security updates and update the pinned WooCommerce release through a tested pull request.
 
