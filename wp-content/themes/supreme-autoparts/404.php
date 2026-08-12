@@ -1,0 +1,1 @@
+<?php get_header(); ?><main id="main" class="section"><div class="container empty-state"><span class="sa-kicker">Error 404</span><h1>That road ends here.</h1><p>The page moved, the part retired, or the URL took a wrong turn.</p><a class="button button--accent" href="<?php echo esc_url( sa_wc_page_url( 'shop' ) ); ?>">Return to the catalog</a></div></main><?php get_footer(); ?>

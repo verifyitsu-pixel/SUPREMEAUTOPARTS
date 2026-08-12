@@ -1,0 +1,13 @@
+.env
+.local/
+node_modules/
+.env.*
+!.env.example
+work/*
+!work/.gitkeep
+outputs/*
+!outputs/.gitkeep
+wp-content/uploads/
+*.log
+.DS_Store
+Thumbs.db

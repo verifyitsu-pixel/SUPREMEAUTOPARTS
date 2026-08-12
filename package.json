@@ -1,0 +1,20 @@
+{
+  "name": "supreme-autoparts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Railway-ready Supreme Autoparts WooCommerce storefront, catalog inventories, and importer tooling.",
+  "packageManager": "pnpm@11.16.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "crawl": "node scripts/crawl-source.mjs",
+    "build:data": "node scripts/build-inventories.mjs",
+    "typecheck": "node --check scripts/build-inventories.mjs && node --check scripts/crawl-source.mjs && node --check wp-content/themes/supreme-autoparts/assets/js/app.js",
+    "lint": "node scripts/validate.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "pnpm build:data && pnpm typecheck && pnpm lint && pnpm test",
+    "preview": "node scripts/preview-server.mjs"
+  },
+  "devDependencies": {
+    "php-parser": "3.2.5"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-08-12T19:00:00Z",
+  "routes": [
+    {"path":"/","type":"homepage","template":"front-page.php","indexable":true},
+    {"path":"/shop/","type":"catalog","template":"woocommerce.php","indexable":true},
+    {"path":"/product/{slug}/","type":"product","template":"WooCommerce single product","indexable":true},
+    {"path":"/product-category/{slug}/","type":"category","template":"woocommerce.php","indexable":true},
+    {"path":"/vehicle/{slug}/","type":"vehicle landing/redirect","template":"fitment-filtered shop","indexable":true},
+    {"path":"/shop-by-vehicle/","type":"vehicle finder","template":"page.php + shortcode","indexable":true},
+    {"path":"/cart/","type":"persistent cart","template":"WooCommerce cart","indexable":false},
+    {"path":"/checkout/","type":"checkout","template":"WooCommerce checkout","indexable":false},
+    {"path":"/my-account/","type":"account/orders","template":"WooCommerce account","indexable":false},
+    {"path":"/?s={query}&post_type=product","type":"product search","template":"search.php","indexable":false},
+    {"path":"/about/","type":"information","template":"page.php","indexable":true},
+    {"path":"/contact/","type":"customer service","template":"page.php","indexable":true},
+    {"path":"/shipping-returns/","type":"policy","template":"page.php","indexable":true},
+    {"path":"/privacy-policy/","type":"policy","template":"page.php","indexable":true},
+    {"path":"/terms/","type":"policy","template":"page.php","indexable":true},
+    {"path":"/deals/","type":"sale catalog","template":"page.php","indexable":true},
+    {"path":"/wp-json/supreme/v1/search","type":"API product search","auth":"public read"},
+    {"path":"/wp-json/supreme/v1/vehicles","type":"API vehicle terms","auth":"public read"},
+    {"path":"/wp-json/supreme/v1/checkout-providers","type":"API provider availability","auth":"public read"},
+    {"path":"/healthz.php","type":"Railway health check","auth":"public read"}
+  ]
+}

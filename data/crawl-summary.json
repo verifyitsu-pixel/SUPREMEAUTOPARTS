@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-08-12T19:38:47.220Z",
+  "source": "https://www.topgearautosport.com",
+  "authorization": "Owner-authorized public-site architecture and catalog audit; no customer/private data collected.",
+  "method": "robots.txt-declared sitemap feeds plus representative public page inspection",
+  "counts": {
+    "products": 17529,
+    "vehicles": 10636,
+    "categories": 280,
+    "brands": 19
+  },
+  "total_inventory_records": 28475,
+  "crawl_policy": {
+    "delay_ms": 1250,
+    "concurrency": 1,
+    "disallowed_paths": [
+      "/adm/",
+      "/lib/",
+      "/plesk-stat/"
+    ]
+  }
+}

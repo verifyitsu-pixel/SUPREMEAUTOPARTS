@@ -1,0 +1,9 @@
+.git
+.github
+work
+outputs
+reports
+tests
+scripts
+*.md
+.env*

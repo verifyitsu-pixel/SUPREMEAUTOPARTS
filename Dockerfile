@@ -1,0 +1,28 @@
+FROM wordpress:6.9.1-php8.3-apache
+
+ARG WOOCOMMERCE_VERSION=10.8.1
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends unzip; \
+    rm -rf /var/lib/apt/lists/*; \
+    curl -fsSL --retry 4 --retry-delay 3 "https://downloads.wordpress.org/plugin/woocommerce.${WOOCOMMERCE_VERSION}.zip" -o /tmp/woocommerce.zip; \
+    unzip -q /tmp/woocommerce.zip -d /usr/src/wordpress/wp-content/plugins/; \
+    rm /tmp/woocommerce.zip; \
+    a2enmod expires headers rewrite remoteip
+
+COPY wp-content/themes/supreme-autoparts/ /usr/src/wordpress/wp-content/themes/supreme-autoparts/
+COPY wp-content/plugins/supreme-autoparts-core/ /usr/src/wordpress/wp-content/plugins/supreme-autoparts-core/
+COPY wp-content/mu-plugins/ /usr/src/wordpress/wp-content/mu-plugins/
+COPY data/products.csv data/vehicle-hierarchy.json /opt/supreme/data/
+COPY deploy/healthz.php /usr/src/wordpress/healthz.php
+COPY deploy/railway-entrypoint.sh /usr/local/bin/railway-entrypoint
+COPY deploy/apache-security.conf /etc/apache2/conf-available/supreme-security.conf
+
+RUN chmod +x /usr/local/bin/railway-entrypoint \
+    && a2enconf supreme-security \
+    && chown -R www-data:www-data /usr/src/wordpress/wp-content
+
+EXPOSE 80
+ENTRYPOINT ["railway-entrypoint"]
+CMD ["apache2-foreground"]
