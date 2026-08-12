@@ -57,6 +57,7 @@ Machine-readable deliverables include JSON, CSV, NDJSON, a make/model hierarchy,
 | Accessibility baseline | Pass | Skip link, labels, ARIA state, keyboard-native controls, focus handling, reduced-motion CSS |
 | Git whitespace | Pass | `git diff --check` clean |
 | Official deployment pins | Pass | WordPress Docker and WooCommerce URLs returned HTTP 200 |
+| GitHub release CI | Configured | Static validation/tests plus a real Railway Docker image build on every `main` push |
 
 The mobile QA initially found the hero outline text clipping at 390 px. The 430 px breakpoint was corrected and the check rerun: the headline fits with no page overflow. Tablet resolves to two category columns and desktop to the full layout.
 
