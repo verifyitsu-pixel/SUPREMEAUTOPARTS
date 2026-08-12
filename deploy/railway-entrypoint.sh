@@ -8,6 +8,14 @@ export WORDPRESS_DB_PASSWORD="${WORDPRESS_DB_PASSWORD:-${MYSQLPASSWORD:-}}"
 export WORDPRESS_DB_NAME="${WORDPRESS_DB_NAME:-${MYSQLDATABASE:-railway}}"
 export WORDPRESS_TABLE_PREFIX="${WORDPRESS_TABLE_PREFIX:-wp_}"
 
+# Railway routes health checks and public traffic to the injected runtime port.
+# The upstream WordPress image defaults Apache to port 80, so update both the
+# listener and virtual host before handing off to its official entrypoint.
+if [[ -n "${PORT:-}" && "${PORT}" =~ ^[0-9]+$ ]]; then
+  sed -ri "s/^Listen [0-9]+$/Listen ${PORT}/" /etc/apache2/ports.conf
+  sed -ri "s/<VirtualHost \*:[0-9]+>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
+fi
+
 if [[ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]]; then
   export WP_HOME="${WP_HOME:-https://${RAILWAY_PUBLIC_DOMAIN}}"
   export WP_SITEURL="${WP_SITEURL:-https://${RAILWAY_PUBLIC_DOMAIN}}"
