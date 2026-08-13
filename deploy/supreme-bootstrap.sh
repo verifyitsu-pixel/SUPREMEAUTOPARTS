@@ -82,6 +82,11 @@ fi
 "${wp_cmd[@]}" plugin activate woocommerce supreme-autoparts-core >/dev/null
 "${wp_cmd[@]}" theme activate supreme-autoparts >/dev/null
 
+# Routing is deployment configuration, not one-time catalog state. Enforce it
+# on every release so an interrupted bootstrap cannot leave query-string URLs.
+"${wp_cmd[@]}" option update permalink_structure '/%postname%/' >/dev/null
+"${wp_cmd[@]}" rewrite flush --hard >/dev/null
+
 # Keep the requested administrator identity in sync without embedding a secret.
 admin_user="${WP_ADMIN_USER:-supremeadmin}"
 if "${wp_cmd[@]}" user get "$admin_user" --field=ID >/dev/null 2>&1; then
@@ -94,7 +99,6 @@ fi
 
 if [[ "$("${wp_cmd[@]}" option get sa_bootstrap_complete 2>/dev/null || true)" != "1" ]]; then
   "${wp_cmd[@]}" supreme catalog setup
-  "${wp_cmd[@]}" rewrite structure '/%postname%/' --hard
   "${wp_cmd[@]}" option update sa_bootstrap_complete 1
 fi
 
