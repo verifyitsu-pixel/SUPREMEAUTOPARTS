@@ -68,3 +68,11 @@ test('catalog updates use the WooCommerce SKU lookup table', async () => {
   assert.match(importer, /wc_get_product_id_by_sku/);
   assert.doesNotMatch(importer, /meta_key' => '_sa_source_id'/);
 });
+
+test('Railway catalog continuation uses bounded parallel batches', async () => {
+  const bootstrap = await read('deploy/supreme-bootstrap.sh');
+  assert.match(bootstrap, /workers=4/);
+  assert.match(bootstrap, /import_pids/);
+  assert.match(bootstrap, /wait "\$import_pid"/);
+  assert.match(bootstrap, /option update sa_catalog_import_offset/);
+});

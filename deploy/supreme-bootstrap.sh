@@ -146,12 +146,22 @@ write_status "catalog-import-seed" false
 (
   total_rows=17529
   batch_size=250
+  workers=4
+  stride=$((batch_size * workers))
   offset="$("${wp_cmd[@]}" option get sa_catalog_import_offset 2>/dev/null || echo 0)"
   [[ "$offset" =~ ^[0-9]+$ ]] || offset=0
   while (( offset < total_rows )); do
     write_status "catalog-import-${offset}" false
-    "${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --offset="$offset" --limit="$batch_size" --status=publish
-    offset=$((offset + batch_size))
+    import_pids=()
+    for worker in $(seq 0 $((workers - 1))); do
+      worker_offset=$((offset + worker * batch_size))
+      if (( worker_offset < total_rows )); then
+        "${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --offset="$worker_offset" --limit="$batch_size" --status=publish &
+        import_pids+=("$!")
+      fi
+    done
+    for import_pid in "${import_pids[@]}"; do wait "$import_pid"; done
+    offset=$((offset + stride))
     if (( offset > total_rows )); then offset=$total_rows; fi
     "${wp_cmd[@]}" option update sa_catalog_import_offset "$offset" >/dev/null
     sleep 2
