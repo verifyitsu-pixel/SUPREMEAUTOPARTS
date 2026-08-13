@@ -36,6 +36,12 @@ mkdir -p /var/www/html/wp-content
 install -m 0644 /usr/src/wordpress/wp-content/db.php /var/www/html/wp-content/db.php
 install -m 0644 /usr/src/wordpress/wp-content/db-error.php /var/www/html/wp-content/db-error.php
 chown www-data:www-data /var/www/html/wp-content/db.php /var/www/html/wp-content/db-error.php
+# Application code is immutable in the image and must replace any version
+# retained in Railway's initialized WordPress directory on every release.
+rm -rf /var/www/html/wp-content/plugins/supreme-autoparts-core /var/www/html/wp-content/themes/supreme-autoparts
+cp -a /usr/src/wordpress/wp-content/plugins/supreme-autoparts-core /var/www/html/wp-content/plugins/
+cp -a /usr/src/wordpress/wp-content/themes/supreme-autoparts /var/www/html/wp-content/themes/
+chown -R www-data:www-data /var/www/html/wp-content/plugins/supreme-autoparts-core /var/www/html/wp-content/themes/supreme-autoparts
 install -m 0644 /usr/src/wordpress/.htaccess /var/www/html/.htaccess
 chown www-data:www-data /var/www/html/.htaccess
 
