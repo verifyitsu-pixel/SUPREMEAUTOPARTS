@@ -20,12 +20,12 @@ require_once SA_CORE_PATH . 'includes/class-sa-brand.php';
 require_once SA_CORE_PATH . 'includes/class-sa-fitment.php';
 require_once SA_CORE_PATH . 'includes/class-sa-rest.php';
 require_once SA_CORE_PATH . 'includes/class-sa-admin.php';
-require_once SA_CORE_PATH . 'includes/class-sa-checkout-providers.php';
 require_once SA_CORE_PATH . 'includes/class-sa-local-pricing.php';
 require_once SA_CORE_PATH . 'includes/class-sa-compliance.php';
 
 final class Supreme_Autoparts_Core {
 	public static function init(): void {
+		require_once SA_CORE_PATH . 'includes/class-sa-checkout-providers.php';
 		SA_Brand::init();
 		SA_Fitment::init();
 		SA_REST::init();
@@ -51,7 +51,7 @@ final class Supreme_Autoparts_Core {
 }
 
 register_activation_hook( __FILE__, array( Supreme_Autoparts_Core::class, 'activate' ) );
-add_action( 'plugins_loaded', array( Supreme_Autoparts_Core::class, 'init' ) );
+add_action( 'plugins_loaded', array( Supreme_Autoparts_Core::class, 'init' ), 20 );
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once SA_CORE_PATH . 'includes/class-sa-import-command.php';

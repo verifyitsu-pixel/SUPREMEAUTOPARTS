@@ -25,8 +25,11 @@ test('core plugin uses WooCommerce CRUD and declares HPOS compatibility', async 
 
 test('checkout remains gateway-neutral', async () => {
   const providers = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-checkout-providers.php');
+	const plugin = await read('wp-content/plugins/supreme-autoparts-core/supreme-autoparts-core.php');
   assert.match(providers, /WC_Payment_Gateway/);
   assert.doesNotMatch(providers, /stripe|paypal|authorize\.net/i);
+	assert.match(plugin, /plugins_loaded', array\( Supreme_Autoparts_Core::class, 'init' \), 20/);
+	assert.match(plugin, /require_once SA_CORE_PATH \. 'includes\/class-sa-checkout-providers\.php'/);
 });
 
 test('checkout requires and records store-policy acceptance', async () => {
