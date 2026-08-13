@@ -40,7 +40,7 @@ final class SA_Product_Images {
 		return $fallback ?: $image;
 	}
 
-	public static function single_image( string $html, int $attachment_id ): string {
+	public static function single_image( string $html, mixed $attachment_id = 0 ): string {
 		global $product;
 		if ( ! $product instanceof WC_Product || $product->get_image_id() ) return $html;
 		$image = self::markup( $product, 'woocommerce_single', array( 'class' => 'wp-post-image sa-source-photo' ) );
