@@ -37,7 +37,7 @@ final class SA_REST {
 	}
 	public static function search( WP_REST_Request $request ): WP_REST_Response {
 		$query = new WP_Query( array( 'post_type' => 'product', 'post_status' => 'publish', 's' => $request->get_param( 'q' ), 'posts_per_page' => 8, 'no_found_rows' => true ) );
-		$results = array_map( fn( $post ) => array( 'title' => get_the_title( $post ), 'url' => get_permalink( $post ), 'image' => get_the_post_thumbnail_url( $post, 'thumbnail' ) ?: '', 'price' => function_exists( 'wc_get_product' ) ? wc_get_product( $post )->get_price_html() : '' ), $query->posts );
+		$results = array_map( function ( $post ) { $product = function_exists( 'wc_get_product' ) ? wc_get_product( $post ) : null; return array( 'title' => get_the_title( $post ), 'url' => get_permalink( $post ), 'image' => get_the_post_thumbnail_url( $post, 'thumbnail' ) ?: ( $product && class_exists( 'SA_Product_Images' ) ? SA_Product_Images::url( $product ) : '' ), 'price' => $product ? $product->get_price_html() : '' ); }, $query->posts );
 		return new WP_REST_Response( $results );
 	}
 }

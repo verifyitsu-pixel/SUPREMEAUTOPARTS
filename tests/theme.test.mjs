@@ -87,3 +87,16 @@ test('completed import performs recoverable duplicate cleanup', async () => {
   assert.match(importer, /wp_trash_post/);
   assert.doesNotMatch(importer, /wp_delete_post/);
 });
+
+test('products use validated real source photos instead of placeholders', async () => {
+  const images = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-product-images.php');
+  const plugin = await read('wp-content/plugins/supreme-autoparts-core/supreme-autoparts-core.php');
+  const rest = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-rest.php');
+  assert.match(images, /_sa_source_image_url/);
+	assert.match(images, /authorized_host/);
+  assert.match(images, /woocommerce_product_get_image/);
+  assert.match(images, /woocommerce_cart_item_thumbnail/);
+  assert.match(images, /woocommerce_single_product_image_thumbnail_html/);
+  assert.match(plugin, /SA_Product_Images::init/);
+  assert.match(rest, /SA_Product_Images::url/);
+});
