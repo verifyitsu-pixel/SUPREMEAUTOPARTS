@@ -58,8 +58,8 @@ final class SA_Import_Command {
 		$dry = isset( $assoc['dry-run'] );
 		$assets = isset( $assoc['include-assets'] );
 		$handle = fopen( $file, 'rb' );
-		$verified_prices = json_decode( (string) @file_get_contents( '/opt/supreme/data/verified-prices.json' ), true );
-		$verified_prices = is_array( $verified_prices['records'] ?? null ) ? $verified_prices['records'] : array();
+		$verified_file = json_decode( (string) @file_get_contents( '/opt/supreme/data/verified-prices.json' ), true );
+		$verified_prices = is_array( $verified_file['records'] ?? null ) ? $verified_file['records'] : array();
 		$headers = fgetcsv( $handle );
 		$count = $skipped = $updated = 0;
 		while ( false !== ( $values = fgetcsv( $handle ) ) ) {
@@ -76,25 +76,80 @@ final class SA_Import_Command {
 			$product->set_status( $status );
 			$product->set_catalog_visibility( 'visible' );
 			$product->set_sku( 'SA-' . sanitize_text_field( $row['source_id'] ) );
-			$verified = $verified_prices[ $row['source_id'] ]['price'] ?? '';
-			$product->set_regular_price( is_numeric( $verified ) ? wc_format_decimal( $verified ) : '' );
+			$price_record = isset( $verified_prices[ $row['source_id'] ] )
+				? array_merge( $verified_prices[ $row['source_id'] ], array( 'basis' => 'source-verified', 'confidence' => 'verified' ) )
+				: $this->estimate_price( $row['title'] );
+			$price = $price_record['price'] ?? '';
+			$product->set_regular_price( is_numeric( $price ) ? wc_format_decimal( $price ) : '' );
 			$product->set_manage_stock( false );
 			$product->update_meta_data( '_sa_source_id', sanitize_text_field( $row['source_id'] ) );
 			$product->update_meta_data( '_sa_source_url', esc_url_raw( $row['source_url'] ) );
+			$product->update_meta_data( '_sa_source_image_url', esc_url_raw( $row['primary_image_url'] ) );
+			$product->update_meta_data( '_sa_price_basis', sanitize_text_field( $price_record['basis'] ?? 'unpriced' ) );
+			$product->update_meta_data( '_sa_price_confidence', sanitize_key( $price_record['confidence'] ?? 'unknown' ) );
+			$product->update_meta_data( '_sa_price_estimated', isset( $price_record['basis'] ) && 0 === strpos( $price_record['basis'], 'market-estimate:' ) ? 'yes' : 'no' );
 			$product->update_meta_data( '_sa_imported_at', gmdate( 'c' ) );
 			$id = $product->save();
+			$this->assign_category( $id, $row['title'] );
 			$this->assign_fitment( $id, $row['title'] );
 			if ( $existing ) $updated++;
 			if ( $assets && ! has_post_thumbnail( $id ) && ! empty( $row['primary_image_url'] ) ) $this->sideload( $id, $row['primary_image_url'] );
 			if ( 0 === $count % 100 ) WP_CLI::log( "Processed {$count} rows..." );
 		}
 		fclose( $handle );
+		if ( ! $dry ) clean_post_cache( 0 );
 		WP_CLI::success( sprintf( '%s %d rows (%d updated).', $dry ? 'Validated' : 'Imported', $count, $updated ) );
 	}
+	private function estimate_price( string $title ): array {
+		$families = array(
+			array( 'truck-bed-rack', '/truck bed rack|ladder rack/i', 699.99, 'medium' ),
+			array( 'towing-mirrors-folding', '/(?:power folding|power fold).*(?:tow|towing) mirror|(?:tow|towing) mirror.*(?:power folding|power fold)/i', 599.99, 'high' ),
+			array( 'towing-mirrors', '/tow(?:ing)? mirrors?/i', 349.99, 'high' ),
+			array( 'running-boards', '/running boards?|nerf bars?|side steps?|step bars?/i', 329.99, 'high' ),
+			array( 'lighting-combo', '/headlights?.*(?:tail lights?|grille)|(?:tail lights?|grille).*headlights?/i', 499.99, 'medium' ),
+			array( 'headlights-led-projector', '/(?:led|drl).*(?:projector )?headlights?|headlights?.*(?:led|drl)/i', 349.99, 'high' ),
+			array( 'headlights-projector', '/projector headlights?/i', 299.99, 'high' ),
+			array( 'headlights-replacement-single', '/(?:left|right|driver|passenger) side replacement headlight/i', 109.99, 'high' ),
+			array( 'headlights', '/headlights?|headlamp/i', 189.99, 'high' ),
+			array( 'tail-lights-led', '/led tail lights?|tube led tail lights?/i', 269.99, 'high' ),
+			array( 'tail-lights', '/tail lights?|altezza lights?/i', 179.99, 'high' ),
+			array( 'fog-lights', '/fog lights?/i', 99.99, 'high' ),
+			array( 'grille-guard', '/grille guard|brush guard|bull bars?/i', 399.99, 'high' ),
+			array( 'grille', '/grilles?|grills?/i', 199.99, 'high' ),
+			array( 'coilovers', '/coilovers?/i', 99.99, 'high' ),
+			array( 'lowering-springs', '/lowering springs?/i', 89.99, 'high' ),
+			array( 'cold-air-intake', '/cold air intake/i', 169.99, 'high' ),
+			array( 'intake', '/short ram intake|intake system|air intake/i', 149.99, 'medium' ),
+			array( 'headers', '/headers?/i', 159.99, 'high' ),
+			array( 'radiator', '/radiators?/i', 139.99, 'high' ),
+			array( 'exhaust', '/catalytic converter|exhaust|muffler|test pipe/i', 189.99, 'medium' ),
+			array( 'side-mirrors', '/side mirrors?|power mirrors?|manual mirrors?/i', 149.99, 'medium' ),
+			array( 'body-accessory', '/fender|bumper|spoiler|front lip|rear lip|hood/i', 249.99, 'medium' ),
+			array( 'small-accessory', '/window visors?|deflectors?|door handles?|gauge cluster|strut bars?|antenna/i', 69.99, 'high' ),
+			array( 'general-accessory', '/.*/i', 149.99, 'low' ),
+		);
+		foreach ( $families as $definition ) {
+			$family = $definition[0]; $pattern = $definition[1]; $price = $definition[2]; $confidence = $definition[3];
+			if ( ! preg_match( $pattern, $title ) ) continue;
+			if ( preg_match( '/carbon fiber/i', $title ) ) $price += 100;
+			if ( preg_match( '/complete kit|combo|and .* set/i', $title ) && 'lighting-combo' !== $family ) $price += 50;
+			$price = max( 29.99, min( 899.99, round( $price ) - 0.01 ) );
+			return array( 'price' => number_format( $price, 2, '.', '' ), 'basis' => 'market-estimate:' . $family, 'confidence' => $confidence );
+		}
+		return array( 'price' => '149.99', 'basis' => 'market-estimate:general-accessory', 'confidence' => 'low' );
+	}
+	private function assign_category( int $product_id, string $title ): void {
+		$rules = array( 'Headlights' => '/headlights?|headlamp/i', 'Tail Lights' => '/tail lights?|altezza lights?/i', 'LED Lighting' => '/\bled\b|light bar/i', 'Towing Mirrors' => '/tow(?:ing)? mirrors?/i', 'Running Boards' => '/running boards?|nerf bars?|side steps?/i', 'Grilles & Armor' => '/grille|grill|bull bar|brush guard/i', 'Fog Lights' => '/fog lights?/i', 'Fender Flares' => '/fender flares?/i' );
+		foreach ( $rules as $category => $pattern ) {
+			if ( preg_match( $pattern, $title ) ) { wp_set_object_terms( $product_id, $category, 'product_cat' ); return; }
+		}
+		wp_set_object_terms( $product_id, 'Truck Accessories', 'product_cat' );
+	}
 	private function assign_fitment( int $product_id, string $title ): void {
+		static $hierarchy = null;
 		$hierarchy_file = '/opt/supreme/data/vehicle-hierarchy.json';
 		if ( ! is_readable( $hierarchy_file ) ) return;
-		$hierarchy = json_decode( (string) file_get_contents( $hierarchy_file ), true );
+		if ( null === $hierarchy ) $hierarchy = json_decode( (string) file_get_contents( $hierarchy_file ), true );
 		foreach ( $hierarchy['makes'] ?? array() as $make ) {
 			$make_name = (string) ( $make['make'] ?? '' );
 			if ( '' === $make_name || ! preg_match( '/^' . preg_quote( $make_name, '/' ) . '\s+(.+?)\s+(19\d{2}|20\d{2})(?:-(19\d{2}|20\d{2}))?\b/i', $title, $matches ) ) continue;
@@ -114,10 +169,19 @@ final class SA_Import_Command {
 		}
 	}
 	private function sideload( int $product_id, string $url ): void {
+		$head = wp_safe_remote_head( esc_url_raw( $url ), array( 'timeout' => 15, 'redirection' => 3 ) );
+		$content_type = is_wp_error( $head ) ? '' : (string) wp_remote_retrieve_header( $head, 'content-type' );
+		if ( ! str_starts_with( strtolower( $content_type ), 'image/' ) ) {
+			update_post_meta( $product_id, '_sa_image_ingest_status', 'source-unavailable' );
+			return;
+		}
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		$id = media_sideload_image( esc_url_raw( $url ), $product_id, null, 'id' );
-		if ( ! is_wp_error( $id ) ) set_post_thumbnail( $product_id, $id );
+		if ( ! is_wp_error( $id ) ) {
+			set_post_thumbnail( $product_id, $id );
+			update_post_meta( $product_id, '_sa_image_ingest_status', 'complete' );
+		}
 	}
 }

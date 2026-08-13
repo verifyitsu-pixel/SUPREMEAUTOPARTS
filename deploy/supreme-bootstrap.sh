@@ -135,8 +135,26 @@ write_status "catalog-setup" false
 # Seed a bounded, production-safe first catalog. The full normalized inventory
 # remains available for managed batch imports, while this ensures search,
 # product pages, cart, and checkout are functional immediately.
-write_status "catalog-import" false
+write_status "catalog-import-seed" false
 "${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --limit=48 --status=publish
+
+# Continue the full catalog asynchronously in bounded, idempotent batches.
+# This keeps Railway startup and HTTP health independent from a long import.
+(
+  total_rows=17529
+  batch_size=250
+  offset="$("${wp_cmd[@]}" option get sa_catalog_import_offset 2>/dev/null || echo 0)"
+  [[ "$offset" =~ ^[0-9]+$ ]] || offset=0
+  while (( offset < total_rows )); do
+    write_status "catalog-import-${offset}" false
+    "${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --offset="$offset" --limit="$batch_size" --status=publish
+    offset=$((offset + batch_size))
+    if (( offset > total_rows )); then offset=$total_rows; fi
+    "${wp_cmd[@]}" option update sa_catalog_import_offset "$offset" >/dev/null
+    sleep 2
+  done
+  write_status "complete" true
+) &
 
 write_status "complete" true
 echo "Supreme bootstrap: WordPress, WooCommerce, theme, and store pages are ready."
