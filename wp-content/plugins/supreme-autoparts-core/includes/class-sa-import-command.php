@@ -34,8 +34,27 @@ final class SA_Import_Command {
 		$categories = array( 'Headlights', 'Tail Lights', 'LED Lighting', 'Truck Accessories', 'Towing Mirrors', 'Running Boards', 'Grilles & Armor', 'Fog Lights', 'Fender Flares', 'Bull Bars' );
 		foreach ( $categories as $category ) if ( ! term_exists( $category, 'product_cat' ) ) wp_insert_term( $category, 'product_cat' );
 		update_option( 'woocommerce_currency', 'USD' ); update_option( 'woocommerce_default_country', 'KE' ); update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'wp_page_for_privacy_policy', $ids['privacy-cookies'] ); update_option( 'woocommerce_terms_page_id', $ids['terms'] );
+		update_option( 'wp_page_for_privacy_policy', $ids['privacy-cookies'] );
+		// Our single, versioned acceptance below covers every linked policy and is
+		// recorded on the order; disable WooCommerce's duplicate terms checkbox.
+		update_option( 'woocommerce_terms_page_id', 0 );
+		$this->setup_shipping();
 		WP_CLI::success( 'Editable pages, WooCommerce routes, and catalog categories are ready.' );
+	}
+
+	private function setup_shipping(): void {
+		if ( ! class_exists( 'WC_Shipping_Zone' ) ) return;
+		$zone = new WC_Shipping_Zone( 0 );
+		$methods = $zone->get_shipping_methods();
+		$by_id = array();
+		foreach ( $methods as $method ) $by_id[ $method->id ] = $method;
+		if ( empty( $by_id['flat_rate'] ) ) { $zone->add_shipping_method( 'flat_rate' ); $methods = $zone->get_shipping_methods( true ); }
+		if ( empty( $by_id['free_shipping'] ) ) { $zone->add_shipping_method( 'free_shipping' ); $methods = $zone->get_shipping_methods( true ); }
+		foreach ( $methods as $method ) {
+			if ( 'flat_rate' === $method->id ) update_option( 'woocommerce_flat_rate_' . $method->instance_id . '_settings', array( 'title' => 'Standard shipping', 'tax_status' => 'none', 'cost' => '35', 'enabled' => 'yes' ) );
+			if ( 'free_shipping' === $method->id ) update_option( 'woocommerce_free_shipping_' . $method->instance_id . '_settings', array( 'title' => 'Free qualifying shipping', 'requires' => 'min_amount', 'min_amount' => (string) SA_Brand::get( 'free_ship' ), 'ignore_discounts' => 'no', 'enabled' => 'yes' ) );
+		}
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 	/**
 	 * Import the normalized product CSV into WooCommerce.

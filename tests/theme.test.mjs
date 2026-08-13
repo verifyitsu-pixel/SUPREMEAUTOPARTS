@@ -55,3 +55,10 @@ test('production bootstrap makes the WooCommerce storefront public', async () =>
   assert.match(bootstrap, /option update woocommerce_coming_soon 'no'/);
   assert.match(bootstrap, /option update fresh_site '0'/);
 });
+
+test('store setup configures shipping and avoids duplicate policy checkboxes', async () => {
+  const importer = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-import-command.php');
+  assert.match(importer, /WC_Shipping_Zone/);
+  assert.match(importer, /free_shipping/);
+  assert.match(importer, /woocommerce_terms_page_id', 0/);
+});
