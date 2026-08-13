@@ -1,88 +1,65 @@
-# Supreme Autoparts â€” Final Audit
+# Supreme Autoparts â€” Production Audit
 
-**Audit date:** 2026-08-12  
-**Repository:** `verifyitsu-pixel/SUPREMEAUTOPARTS`  
-**Target:** Railway Docker service + Railway managed MySQL + WooCommerce  
-**Branch:** `main`
+Audit updated: 2026-08-13  
+Repository: `verifyitsu-pixel/SUPREMEAUTOPARTS`  
+Production: `https://www.supremeautoparts.co.ke/`  
+Deployment: Railway Docker service with managed MySQL and GitHub auto-deploy
 
-## Executive result
+## Result
 
-The initially connected GitHub repository was public but completely empty: no commits, files, framework, package manager, routes, database schema, authentication, commerce, payments, APIs, environment variables, deployment configuration, or tests existed. The project is therefore a clean-slate WordPress/WooCommerce implementation; no useful prior code or history was removed.
+The public WooCommerce storefront is live. The repository contains a custom responsive Supreme Autoparts theme and core plugin, normalized source inventories, crawler/importer tooling, deterministic market-price estimates, vehicle fitment, local-currency display, cart/account/order support, PesaPal and TransactPay abstractions, policy enforcement, tests, and Railway deployment automation.
 
-The completed repository provides a custom Supreme Autoparts theme, an HPOS-compatible companion plugin, Railway deployment assets, normalized public catalog inventories, an idempotent WP-CLI importer, automated tests, and operator documentation. Customer-facing code contains no accidental legacy brand references. Source-domain references remain only in authorized `/data` provenance records and crawler/import tooling where traceability requires them.
+No private source pages, customer records, credentials, or payment data were collected. No AI product images are used.
 
-## Source audit and inventory
+## Authorized source inventory
 
-`robots.txt` allowed public crawling and declared five sitemap feeds while disallowing `/adm/`, `/lib/`, and `/plesk-stat/`. The crawl used a descriptive user agent, concurrency `1`, and a 1.25-second delay. It did not collect accounts, customer data, order data, session data, or restricted content.
+The respectful crawl used the public `robots.txt` sitemap declarations, concurrency 1, and a 1.25-second delay. Restricted paths were excluded.
 
-Authoritative sitemap discovery produced:
-
-| Inventory | Records |
+| Surface | Discovered records |
 |---|---:|
 | Products | 17,529 |
 | Vehicle/catalog URLs | 10,636 |
-| Category entries | 280 |
-| Brand entries | 19 |
-| Total manifest records | 28,475 |
+| Categories | 280 |
+| Brands | 19 |
+| Total inventory records | 28,475 |
+| Real source photo mappings | 39,058 |
 
-Machine-readable deliverables include JSON, CSV, NDJSON, a make/model hierarchy, an asset inventory, a route inventory, and a legacy redirect map. Representative public pages inspected included the homepage, vehicle index, contact, store policy, about, and privacy pages. The sitemap feeds are complete as of the audit timestamp; individual content/status retrieval for all 28,475 URLs was intentionally not performed in one run because that would be unnecessarily aggressive. Records distinguish `discovered` from `observed-200` status.
+Machine-readable outputs are under `/data`, including product CSV/JSON, vehicle hierarchy, categories, brands, crawl manifest, assets, routes, redirects, verified prices, and generated estimated prices.
 
-## Implemented architecture
+## Production verification
 
-- WordPress `6.9.1-php8.3-apache` official Docker image (registry tag verified).
-- WooCommerce `10.8.1` official archive (download endpoint verified+]8çkh‘éì¶»§q«^vŒLœM\Ûİ][™N››Û™_KšXY\‹\ÙX\˜Ú™›Øİ\Ë]Ú][Ø›Ü™\‹XÛÛÜ˜\ŠK\™Y
-_KšXY\‹\ÙX\˜Ú]ÛİÚYLØ›Ü™\ŒØ˜XÚÙÜ›İ[™˜\ŠK\™Y
-NØÛÛÜˆÙ™™Ù›Û\Ú^™NŒKœ™[NØİ\œÛÜœÚ[\ŸKœÙX\˜Ú\™\İ[ŞÜÜÚ][Û˜XœÛÛ]NİÜ˜Ø[ÊL	H
-È
-NÛY‹LœÜšYÚ‹LœØ˜XÚÙÜ›İ[™ˆÙ™™Ø›Ü™\Œ\ÛÛY˜\ŠK[[™JNØ›Ş\ÚYİÎ˜\ŠK\ÚYİÊNŞ‹Z[™^ŒÌKœÙX\˜Ú\™\İ[Ù\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎLœYœˆ]]ÎÙØ\ŒLœØ[YÛ‹Z][\Î˜Ù[\ÜY[™ÎŒLØ›Ü™\‹X›İÛNŒ\ÛÛY˜\ŠK[[™J_KœÙX\˜Ú\™\İ[šİ™\Ø˜XÚÙÜ›İ[™˜\ŠK\\\Š_KœÙX\˜Ú\™\İ[[YŞİÚYLœÚZYÚLœÛØš™XİYš]˜ÛÛZ[ŸKœÙX\˜Ú\™\İ[ÛX[ØÛÛÜ˜\ŠK\™Y
-_KšXY\‹XXİ[ÛœŞÙ\Ü^N™›^ÙØ\ŒŒKšXY\‹XXİ[ÛœÏ˜^Ù\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎ˜]]È]]ÎÙÜšY][\]K\›İÜÎ˜]]È]]ÎØÛÛ[[‹YØ\\ÜÜÚ][Ûœ™[]]™_KšXY\‹XXİ[ÛœÏ˜OœÜ[™š\œİXÚ[ÙÜšY\›İÎŒKÌÎÙ›Û\Ú^™NŒK™[_KšXY\‹XXİ[ÛœÈÛX[ØÛÛÜ˜\ŠK[]]Y
-NÙ›Û\Ú^™N‹Ü™[Nİ^]˜[œÙ›Ü›N\\˜Ø\Ù_KšXY\‹XXİ[ÛœÈİ›Û™ŞÙ›ÛÌM\™[H	Ğ˜\›İÈÛÛ™[œÙY	ËØ[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\Ù_KšXY\‹XØ\×ØÛİ[ÜÜÚ][Û˜XœÛÛ]NÛYŒŒİÜ‹MÜØ˜XÚÙÜ›İ[™˜\ŠK\™Y
-NØÛÛÜˆÙ™™Ø›Ü™\‹\˜Y]\ÎŒŒÛZ[‹]ÚYŒNÚZYÚŒNİ^X[YÛ˜Ù[\Ù›Û\Ú^™N‹™[NÜY[™ÎŒ\Kœš[X\K[˜]Ø˜XÚÙÜ›İ[™˜\ŠK[˜]JNØÛÛÜˆÙ™™ŸKœš[X\K[˜]ˆ[Û\İ\İ[N››Û™NÛX\™Ú[ŒÜY[™ÎŒÙ\Ü^N™›^Kœš[X\K[˜]ˆ^Ù\Ü^N˜›ØÚÎÜY[™ÎŒMŒÙ›ÛÌ™[H	Ğ˜\›İÈÛÛ™[œÙY	ËØ[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛ]\‹\ÜXÚ[™Î‹Œ™[NØ›Ü™\‹[YŒ\ÛÛY™Ø˜JMKMKMKŒ
-_Kœš[X\K[˜]ˆNšİ™\‹œš[X\K[˜]ˆ˜İ\œ™[[Y[KZ][H^Ø˜XÚÙÜ›İ[™˜\ŠK\™Y
-_K›Y[K]ÙÙÛ^Ù\Ü^N››Û™_Kš\›ŞÜÜÚ][Ûœ™[]]™NÛİ™\™›İÎšY[ØÛÛÜˆÙ™™Ø˜XÚÙÜ›İ[™œ˜YX[YÜ˜YY[
-Ú\˜ÛH]ÍIHIKÌÍØÍÌYŒÌ˜ÈÉKÌLLÌNH	JNÛZ[‹ZZYÚMÌKš\›Î˜™Y›Ü™^ØÛÛ[ˆˆÜÜÚ][Û˜XœÛÛ]NÚ[œÙ]ŒØ˜XÚÙÜ›İ[™œ™\X][™Ë[[™X\‹YÜ˜YY[
-LL™YË˜[œÜ\™[Í™Ø˜JMKMKMKŒN
-HÍ\Íœ
-NÜÚ[\‹Y]™[Î››Û™_Kš\›××ÙÜšYÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎ	HL‰NÜÜÚ][Ûœ™[]]™NÛZ[‹ZZYÚMÌKš\›××ØÛÜ^Ø[YÛ‹\Ù[˜Ù[\ÜY[™ÎŒK™^YXœ›İËœØKZÚXÚÙ\Ù\Ü^N˜›ØÚÎØÛÛÜ˜\ŠK\™Y
-NÙ›ÛÌÍœ™[H[\‹Ø[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛ]\‹\ÜXÚ[™Î‹ŒMÙ[NÛX\™Ú[‹X›İÛNKš\›È^Ù›ÛÛ[\
-Ëœ™[K‹]Ë‹ŒÜ™[JKËˆ	Ğ˜\›İÈÛÛ™[œÙY	ËØ[œË\Ù\šYÛ]\‹\ÜXÚ[™Î‹KŒÍY[Nİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛX\™Ú[ŒMœ\Kš\›ÈH[^ØÛÛÜ˜[œÜ\™[Ë]ÙXšÚ]]^\İ›ÚÙNŒK\Ù™™Ù›Û\İ[N››Ü›X[Kš\›××ØÛÜOœØÛÛÜˆØÍ˜ØYÛX^]ÚYMŒÙ›Û\Ú^™NŒKŒ™[_Kš\›××ØXİ[ÛœŞÙ\Ü^N™›^ÙØ\ŒLœÛX\™Ú[‹]ÜŒÌK˜]Û‹ÛÛØÛÛ[Y\˜ÙHK˜]Û‹ÛÛØÛÛ[Y\˜ÙH]Û‹˜]Û‹ÛÛØÛÛ[Y\˜ÙH[œ]˜]ÛÙ\Ü^Nš[›[™KY›^Ø[YÛ‹Z][\Î˜Ù[\Ú\İYKXÛÛ[˜Ù[\ÙØ\ŒMØ›Ü™\ŒØ›Ü™\‹\˜Y]\Î˜\ŠK\˜Y]\ÊNÜY[™ÎŒMŒœÙ›ÛÌœ™[H[\‹Ø[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛ]\‹\ÜXÚ[™Î‹ŒY[NØİ\œÛÜœÚ[\İ˜[œÚ][Û‹ŒœßK˜]Û‹KXXØÙ[ÛÛØÛÛ[Y\˜ÙHK˜]Û‹˜[ÛÛØÛÛ[Y\˜ÙH]Û‹˜]Û‹˜[ÛÛØÛÛ[Y\˜ÙH[œ]˜]Û‹˜[Ø˜XÚÙÜ›İ[™˜\ŠK\™Y
-NØÛÛÜˆÙ™™ŸK˜]Û‹KXXØÙ[šİ™\‹ÛÛØÛÛ[Y\˜ÙHK˜]Û‹˜[šİ™\‹ÛÛØÛÛ[Y\˜ÙH]Û‹˜]Û‹˜[šİ™\Ø˜XÚÙÜ›İ[™˜\ŠK\™YY\šÊNØÛÛÜˆÙ™™ŸK˜]Û‹KYÚÜİØÛÛÜˆÙ™™Ø›Ü™\Œ\ÛÛY™Ø˜JMKMKMKŒÍJ_K˜]Û‹K[YÚØ˜XÚÙÜ›İ[™ˆÙ™™ØÛÛÜ˜\ŠKZ[šÊ_Kš\›××Ü›ÛÙÙ\Ü^N™›^Û\İ\İ[N››Û™NÜY[™ÎŒÛX\™Ú[ÙØ\ŒØÛÛÜˆØYX™Ù›Û\Ú^™N‹Í\™[Nİ^]˜[œÙ›Ü›N\\˜Ø\Ù_Kš\›××Ü›ÛÙˆİ›Û™ŞÙ\Ü^N˜›ØÚÎØÛÛÜˆÙ™™Ù›ÛÌKŒ\™[H	Ğ˜\›İÈÛÛ™[œÙY	ËØ[œË\Ù\šYŸKš\›××İš\İX[ÜÜÚ][Ûœ™[]]™NØ[YÛ‹\Ù[™[™Kš\›××İš\İX[š[YŞÙ\Ü^N˜›ØÚÎİÚYŒLŒ	NÛX^]ÚY››Û™Nİ˜[œÙ›Ü›N˜[œÛ]V
-M‰JNÙš[\™›Ü\ÚYİÊŒœ\™Ø˜JMJJ_Kš\›××Ø˜YÙ^ÜÜÚ][Û˜XœÛÛ]NÜšYÚŒ‰NİÜŒM	NİÚYŒLœÚZYÚŒLœØ›Ü™\‹\˜Y]\ÎL	NØ˜XÚÙÜ›İ[™˜\ŠK^Y[İÊNØÛÛÜ˜\ŠKZ[šÊNÙ\Ü^N™ÜšYÜXÙKXÛÛ[˜Ù[\İ^X[YÛ˜Ù[\Ù›ÛÌ™[KÌH[\‹Ø[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\ÙNİ˜[œÙ›Ü›Nœ›İ]JYÊNØ›Ş\ÚYİÎŒ™Ø˜JMKNM‹KŒMÊ_Kš\›××Ø˜YÙHİ›Û™ŞÙ›ÛK™[H	Ğ˜\›İÈÛÛ™[œÙY	ßK™ZXÛKX˜\Ø˜XÚÙÜ›İ[™˜\ŠK\™Y
-NØÛÛÜˆÙ™™ÜY[™ÎŒŒœKœØK]™ZXÛK\Ù[XİÜÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎŒKŒYœˆ™\X]
-ËZ[›X^
-LÌYœŠJH]]ÎÙØ\ŒLœØ[YÛ‹Z][\Î˜Ù[\ŸKœØK]™ZXÛK\Ù[XİÜ—×ÚXY[™Èİ›Û™ŞÙ\Ü^N˜›ØÚÎÙ›ÛK™[H	Ğ˜\›İÈÛÛ™[œÙY	ËØ[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\Ù_K™ZXÛKX˜\ˆœØKZÚXÚÙ\ØÛÛÜˆÙ™™Ù_KœØK]™ZXÛK\Ù[XİÜˆÙ[XİİÚYŒL	NÚZYÚØ›Ü™\ŒÜY[™ÎŒMØ˜XÚÙÜ›İ[™ˆÙ™™ØÛÛÜ˜\ŠKZ[šÊNØ›Ü™\‹\˜Y]\Î˜\ŠK\˜Y]\Ê_K™ZXÛKX˜\ˆ˜]Û‹KXXØÙ[Ø˜XÚÙÜ›İ[™˜\ŠKZ[šÊNÚZYÚKœØKYØ\˜YÙK\Ø]™^ÙÜšYXÛÛ[[Œ‹ËLNØ›Ü™\ŒØ˜XÚÙÜ›İ[™››Û™NØÛÛÜˆÙ™™İ^X[YÛœšYÚİ^YXÛÜ˜][Û[™\›[™_KœÙXİ[ÛÜY[™Î\KœÙXİ[Û‹KXØ]YÛÜšY\ŞØ˜XÚÙÜ›İ[™˜\ŠK\\\Š_KœÙXİ[Û‹ZXY[™ŞÙ\Ü^N™›^Ø[YÛ‹Z][\Î™[™Ú\İYKXÛÛ[œÜXÙKX™]ÙY[ÛX\™Ú[‹X›İÛNŒÌœKœÙXİ[Û‹ZXY[™È‹œ\™›Ü›X[˜ÙKX˜[›™\ˆ‹™›Ûİ\‹XİH‹œYÙKZXY\ˆ^Ù›ÛÛ[\
-‹™[K]Ë™[JKËMH	Ğ˜\›İÈÛÛ™[œÙY	ËØ[œË\Ù\šYİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛX\™Ú[ŒKœÙXİ[Û‹ZXY[™Ï˜^ØÛÛÜ˜\ŠK\™Y
-NÙ›Û\Ú^™N‹™[NÙ›Û]ÙZYÚÌİ^]˜[œÙ›Ü›N\\˜Ø\Ù_K˜Ø]YÛÜKYÜšYÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-ËYœŠNÙØ\ŒMœK˜Ø]YÛÜKXØ\™ÛZ[‹ZZYÚŒÌØ˜XÚÙÜ›İ[™ˆÙ™™ÜÜÚ][Ûœ™[]]™NÛİ™\™›İÎšY[ÜY[™ÎŒÙ\Ü^N™ÜšYÙÜšY][\]K\›İÜÎŒYœˆ]]ÎØ›Ü™\Œ\ÛÛY˜[œÜ\™[İ˜[œÚ][Û‹Œ\ßK˜Ø]YÛÜKXØ\™šİ™\İ˜[œÙ›Ü›N˜[œÛ]VJM
-NØ›Ş\ÚYİÎ˜\ŠK\ÚYİÊNØ›Ü™\‹XÛÛÜˆÙK˜Ø]YÛÜKXØ\™[YŞÜÜÚ][Û˜XœÛÛ]NÜšYÚ‹LLİÜŒNİÚYN	NÚZYÚŒM\ÛØš™XİYš]˜ÛÛZ[Ùš[\™Ü˜^\ØØ[JŒMJ_K˜Ø]YÛÜKXØ\™×Û[X™\Ù›ÛÌ™[H	Ğ˜\›İÈÛÛ™[œÙY	ÎØÛÛÜˆØM˜NM_K˜Ø]YÛÜKXØ\™ŞÙ›ÛK\™[H	Ğ˜\›İÈÛÛ™[œÙY	Îİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛX\™Ú[ŒK˜Ø]YÛÜKXØ\™ØÛÛÜ˜\ŠK[]]Y
-NÛX\™Ú[ŒœMÙ›Û\Ú^™N‹™[_K˜Ø]YÛÜKXØ\™]œÜ[ØÛÛÜ˜\ŠK\™Y
-Nİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÙ›Û\Ú^™N‹Ìœ™[NÙ›Û]ÙZYÚÌK˜Ø]YÛÜKXØ\™KY™X]\™YØ˜XÚÙÜ›İ[™˜\ŠK[˜]JNØÛÛÜˆÙ™™ŸK˜Ø]YÛÜKXØ\™KY™X]\™YØÛÛÜˆØÎØÙ_Kœ›ÙXİŞÙ\Ü^N™ÜšYZ[\Ü[ÙÜšY][\]KXÛÛ[[œÎœ™\X]
-YœŠNÙØ\ŒNÛX\™Ú[ŒZ[\Ü[KÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÎ˜™Y›Ü™KÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÎ˜Y\Ù\Ü^N››Û™_KÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÈKœ›ÙXİÙ›Ø]››Û™HZ[\Ü[İÚY˜]]ÈZ[\Ü[ÛX\™Ú[ŒZ[\Ü[Ø›Ü™\Œ\ÛÛY˜\ŠK[[™JNÜY[™ÎŒMœØ˜XÚÙÜ›İ[™ˆÙ™™İ˜[œÚ][Û‹ŒœßKÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÈKœ›ÙXİšİ™\Ø›Ş\ÚYİÎ˜\ŠK\ÚYİÊNİ˜[œÙ›Ü›N˜[œÛ]VJLÜ
-_KÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÈKœ›ÙXİH[YŞØ\ÜXİ\˜][ÎŒKÌNÛØš™XİYš]˜ÛÛZ[ÛX\™Ú[ŒM\KÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÈKœ›ÙXİÛÛØÛÛ[Y\˜ÙK[ÛÜ\›ÙXİ×İ]^Ù›ÛÌKŒLœ™[KÌKŒˆ	Ğ˜\›İÈÛÛ™[œÙY	ÎÜY[™ÎŒİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛZ[‹ZZYÚŒ‹[_KÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÈKœ›ÙXİœšXÙ^ØÛÛÜ˜\ŠK\™Y
-NÙ›Û]ÙZYÚÌKÛÛØÛÛ[Y\˜ÙH[œ›ÙXİÈKœ›ÙXİ˜]ÛÛX\™Ú[‹]ÜŒLØ˜XÚÙÜ›İ[™˜\ŠK[˜]JNØÛÛÜˆÙ™™ŸKœ\™›Ü›X[˜ÙKX˜[›™\Ø˜XÚÙÜ›İ[™›[™X\‹YÜ˜YY[
-LLYËÌNLYLˆÌNLYLˆMIKÌL˜ÌÍˆMIJNØÛÛÜˆÙ™™ÜY[™ÎKœ\™›Ü›X[˜ÙKX˜[›™\‹˜ÛÛZ[™\Ù\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎŒYœˆYœÙØ\Ø[YÛ‹Z][\Î˜Ù[\ŸKœ\™›Ü›X[˜ÙKX˜[›™\ˆØÛÛÜˆØ˜˜ÌÎÛX^]ÚYŒKœ\™›Ü›X[˜ÙKX˜[›™\—×Üİ]ŞÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-ËYœŠNÙØ\Œ\Ø˜XÚÙÜ›İ[™œ™Ø˜JMKMKMKŒM
-_Kœ\™›Ü›X[˜ÙKX˜[›™\—×Üİ]È]Ø˜XÚÙÜ›İ[™ˆÌL˜ÌÍÜY[™ÎŒÌNÛZ[‹ZZYÚŒMŒKœ\™›Ü›X[˜ÙKX˜[›™\—×Üİ]Èİ›Û™ŞÙ›Ûœ™[H	Ğ˜\›İÈÛÛ™[œÙY	ÎÙ\Ü^N˜›ØÚÎØÛÛÜ˜\ŠK^Y[İÊ_Kœ\™›Ü›X[˜ÙKX˜[›™\—×Üİ]ÈÜ[Ù›Û\Ú^™N‹Î™[NØÛÛÜˆØ™˜ÌØÎ_K\İÜY[™ÎLK\İ‹˜ÛÛZ[™\Ù\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-YœŠNÙØ\ŒÌœK\İ\XÛ^Ù\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎœYœØÛÛ[[‹YØ\ŒMK\İ\XÛOœÜ[ÙÜšY\›İÎŒKÌÎİÚYœÚZYÚœØ˜XÚÙÜ›İ[™˜\ŠK\\\ŠNÙ\Ü^N™ÜšYÜXÙKXÛÛ[˜Ù[\ØÛÛÜ˜\ŠK\™Y
-NÙ›Û\Ú^™NŒKŒÍ\™[_K\İŞÙ›ÛKŒ\™[H	Ğ˜\›İÈÛÛ™[œÙY	Îİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛX\™Ú[ŒK\İÙ›Û\Ú^™N‹œ™[NØÛÛÜ˜\ŠK[]]Y
-NÛX\™Ú[KœÚ]KY›Ûİ\Ø˜XÚÙÜ›İ[™ˆÌLMXØÛÛÜˆÙ™™ŸK™›Ûİ\‹Xİ^Ø˜XÚÙÜ›İ[™˜\ŠK\™Y
-NÜY[™ÎŒÍK™›Ûİ\‹XİO‹˜ÛÛZ[™\Ù\Ü^N™›^Ø[YÛ‹Z][\Î˜Ù[\Ú\İYKXÛÛ[œÜXÙKX™]ÙY[ŸK™›Ûİ\‹XİHœØKZÚXÚÙ\ØÛÛÜˆÙ™™˜ØŸK™›Ûİ\‹XİHÙ›Û\Ú^™NŒ‹\™[_K™›Ûİ\‹YÜšYÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎŒKYœˆ™\X]
-ËYœŠNÙØ\ÌÜY[™ÎÌK™›Ûİ\‹YÜšYØÛÛÜˆØYX™Ù›Û\Ú^™N‹\™[_K™›Ûİ\‹YÜšYŞÙ›ÛKŒ\™[H	Ğ˜\›İÈÛÛ™[œÙY	Îİ^]˜[œÙ›Ü›N\\˜Ø\Ù_K™›Ûİ\‹YÜšYÙXİ[Û˜^Ù\Ü^N˜›ØÚÎØÛÛÜˆØ™ÌXÍÎÙ›Û\Ú^™N‹™[NÛX\™Ú[ŒLK›™]ÜÛ]\Ù\Ü^N™›^K›™]ÜÛ]\ˆ[œ]İÚYŒL	NÜY[™ÎŒLœØ˜XÚÙÜ›İ[™ˆÌYŒÌ˜ÎØ›Ü™\Œ\ÛÛYÌÎMØÛÛÜˆÙ™™ŸK›™]ÜÛ]\ˆ]ÛØ›Ü™\ŒØ˜XÚÙÜ›İ[™˜\ŠK\™Y
-NØÛÛÜˆÙ™™İÚY\K™›Ûİ\‹YÜšYÛX[ØÛÛÜˆÍÍÍÙŸK™›Ûİ\‹X›İÛ^Ø›Ü™\‹]ÜŒ\ÛÛYÌ˜ÌÌŒØÜY[™ÎŒŒÌÙ\Ü^N™›^Ú\İYKXÛÛ[œÜXÙKX™]ÙY[ØÛÛÜˆÎÎNMÙ›Û\Ú^™N‹Ü™[_K˜ÛÛ[\Ú[ÛX^]ÚYLKœYÙKZXY\Ø›Ü™\‹[Y\ÛÛY˜\ŠK\™Y
-NÜY[™Ë[YŒ\ÛX\™Ú[‹X›İÛNK™[KXÛÛ[Ù›Û\Ú^™NŒKŒ\™[_K™[KXÛÛ[‹™[KXÛÛ[ŞÙ›ÛY˜[Z[N‰Ğ˜\›İÈÛÛ™[œÙY	Îİ^]˜[œÙ›Ü›N\\˜Ø\Ù_K˜\XÛKYÜšYÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-‹YœŠNÙØ\ŒÌK˜\XÛKXØ\™Ø›Ü™\Œ\ÛÛY˜\ŠK[[™J_K˜\XÛKXØ\™™]ÜY[™ÎŒŒœK˜\XÛKXØ\™Ù›ÛÌK™[H	Ğ˜\›İÈÛÛ™[œÙY	ßK™[\K\İ]^İ^X[YÛ˜Ù[\ÜY[™ÎŒLLŒK™[\K\İ]HK™[\K\İ]HÙ›Û™[H	Ğ˜\›İÈÛÛ™[œÙY	Îİ^]˜[œÙ›Ü›N\\˜Ø\ÙNÛX\™Ú[ŒKœÚÜZXY[™ŞÛX\™Ú[‹X›İÛNŒÍ\KœÚÜZXY[™Ï‹œØK]™ZXÛK\Ù[XİÜØ˜XÚÙÜ›İ[™˜\ŠK\\\ŠNÜY[™ÎŒNÛX\™Ú[‹]ÜŒKœØKYš]Y[Ø˜XÚÙÜ›İ[™ˆÙYÙYNØ›Ü™\‹[YÛÛYÌ˜ÎÎÜY[™ÎŒMMœÛX\™Ú[ŒNKœØKYš]Y[ÛX\™Ú[KÛÛØÛÛ[Y\˜ÙH]‹œ›ÙXİÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎŒYœˆYœÙØ\M\KÛÛØÛÛ[Y\˜ÙH]‹œ›ÙXİ]‹š[XYÙ\ËÛÛØÛÛ[Y\˜ÙH]‹œ›ÙXİ]‹œİ[[X\^Ù›Ø]››Û™HZ[\Ü[İÚY˜]]ÈZ[\Ü[KÛÛØÛÛ[Y\˜ÙH]‹œ›ÙXİœ›ÙXİİ]^Ù›Û‹\™[KÌH	Ğ˜\›İÈÛÛ™[œÙY	Îİ^]˜[œÙ›Ü›N\\˜Ø\Ù_KÛÛØÛÛ[Y\˜ÙH]‹œ›ÙXİœšXÙ^ØÛÛÜ˜\ŠK\™Y
-NÙ›Û\Ú^™NŒKœ™[_KÛÛØÛÛ[Y\˜ÙHX›KœÚÜİX›^Ø›Ü™\‹XÛÛÜ˜\ŠK[[™JNØ›Ü™\‹\˜Y]\ÎŒKÛÛØÛÛ[Y\˜ÙH›Ü›H™›Ü›K\›İÈ[œ]š[œ]]^ÛÛØÛÛ[Y\˜ÙH›Ü›H™›Ü›K\›İÈ^\™XKœÙ[Xİ‹XÛÛZ[™\‹KYY˜][œÙ[Xİ‹\Ù[Xİ[Û‹K\Ú[™Û^ÜY[™ÎŒLœØ›Ü™\Œ\ÛÛYØÎXØ™Ø›Ü™\‹\˜Y]\ÎŒœKÛÛØÛÛ[Y\˜ÙK[Y\ÜØYÙKÛÛØÛÛ[Y\˜ÙKZ[™›ŞØ›Ü™\‹]ÜXÛÛÜ˜\ŠK\™Y
-_KÛÛØÛÛ[Y\˜ÙK[Y\ÜØYÙN˜™Y›Ü™KÛÛØÛÛ[Y\˜ÙKZ[™›Î˜™Y›Ü™^ØÛÛÜ˜\ŠK\™Y
-_CBYYXJX^]ÚYŒL
-^ËšXY\‹[XZ[ÙÜšY][\]KXÛÛ[[œÎŒŒŒYœˆ]]ÎÙØ\ŒNKšXY\‹XXİ[ÛœÈÛX[šXY\‹XXİ[ÛœÈİ›Û™ŞÙ\Ü^N››Û™_Kœš[X\K[˜]ˆ^ÜY[™ÎŒLÜLœKš\›××ÙÜšYÙÜšY][\]KXÛÛ[[œÎMIHI_Kš\›××İš\İX[š[YŞİÚYŒM	_K˜Ø]YÛÜKYÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-‹YœŠ_Kœ›ÙXİŞÙÜšY][\]KXÛÛ[[œÎœ™\X]
-ËYœŠ_KœØK]™ZXÛK\Ù[XİÜÙÜšY][\]KXÛÛ[[œÎœ™\X]
-ËYœŠ_KœØK]™ZXÛK\Ù[XİÜ—×ÚXY[™ŞÙÜšYXÛÛ[[ŒKËL_Kœ\™›Ü›X[˜ÙKX˜[›™\‹˜ÛÛZ[™\ÙÜšY][\]KXÛÛ[[œÎŒYœŸK™›Ûİ\‹YÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-‹YœŠ__CBYYXJX^]ÚYÌŒ
-^Îœ›ÛİËKXÛÛZ[™\›Z[ŠL	HHL
-_K˜[››İ[˜Ù[Y[×Üİ\ÜÙ\Ü^N››Û™_KšXY\‹[XZ[ÙÜšY][\]KXÛÛ[[œÎ˜]]ÈYœˆ]]ÎÜY[™ÎŒLœK˜œ˜[™[YŞİÚYŒNLK›Y[K]ÙÙÛ^Ù\Ü^N™ÜšYİÚYŒÍœØ›Ü™\ŒØ˜XÚÙÜ›İ[™››Û™NÜY[™ÎœÙØ\K›Y[K]ÙÙÛHÜ[››İ
-œØÜ™Y[‹\™XY\‹]^
-^ÚZYÚŒœØ˜XÚÙÜ›İ[™˜\ŠKZ[šÊ_KšXY\‹\ÙX\˜ÚÙÜšYXÛÛ[[ŒKËLNÙÜšY\›İÎŒŸKšXY\‹XXİ[ÛœÏ˜N™š\œİXÚ[Ù\Ü^N››Û™_Kœš[X\K[˜]Ù\Ü^N››Û™NÜÜÚ][Û˜XœÛÛ]NÛYŒÜšYÚŒKœš[X\K[˜]‹š\Ë[Ü[Ù\Ü^N˜›ØÚßKœš[X\K[˜]ˆ[Ù\Ü^N˜›ØÚßKš\›Ëš\›××ÙÜšYÛZ[‹ZZYÚ˜]]ßKš\›××ÙÜšYÙÜšY][\]KXÛÛ[[œÎŒYœŸKš\›××ØÛÜ^ÜY[™ÎŒÌKš\›È^Ù›Û\Ú^™NŒ\™[_Kš\›××İš\İX[ÚZYÚŒLKš\›××İš\İX[š[YŞİÚYŒL	Nİ˜[œÙ›Ü›N››Û™NÜÜÚ][Û˜XœÛÛ]NØ›İÛN‹LŒKš\›××Ü›ÛÙÙØ\ŒMK™ZXÛKX˜\ÜY[™ÎŒMœKœØK]™ZXÛK\Ù[XİÜÙÜšY][\]KXÛÛ[[œÎŒYœŸKœØK]™ZXÛK\Ù[XİÜ—×ÚXY[™ŞÙÜšYXÛÛ[[˜]]ßKœÙXİ[ÛÜY[™ÎŒKœÙXİ[Û‹ZXY[™ŞØ[YÛ‹Z][\Îœİ\K˜Ø]YÛÜKYÜšYÙÜšY][\]KXÛÛ[[œÎŒYœŸK˜Ø]YÛÜKXØ\™ÛZ[‹ZZYÚŒŒKœ›ÙXİŞÙÜšY][\]KXÛÛ[[œÎœ™\X]
-‹YœŠ_Kœ\™›Ü›X[˜ÙKX˜[›™\—×Üİ]ŞÙÜšY][\]KXÛÛ[[œÎŒYœŸK\İ‹˜ÛÛZ[™\ÙÜšY][\]KXÛÛ[[œÎŒYœˆYœŸK™›Ûİ\‹XİO‹˜ÛÛZ[™\‹™›Ûİ\‹X›İÛ^Ù\Ü^N˜›ØÚßK™›Ûİ\‹XİH˜]ÛÛX\™Ú[‹]ÜŒNK™›Ûİ\‹YÜšYÙÜšY][\]KXÛÛ[[œÎŒYœÙØ\ŒKÛÛØÛÛ[Y\˜ÙH]‹œ›ÙXİÙÜšY][\]KXÛÛ[[œÎŒYœŸK˜\XÛKYÜšYÙÜšY][\]KXÛÛ[[œÎŒYœŸKœÚÜZXY[™Ï‹œØK]™ZXÛK\Ù[XİÜÙÜšY][\]KXÛÛ[[œÎŒYœŸ_CBYYXJX^]ÚYÌ
-^Ëš\›È^Ù›Û\Ú^™NŒ‹M\™[NÛ]\‹\ÜXÚ[™Î‹KŒY[_Kš\›××ØXİ[ÛœŞÙ\Ü^N™ÜšYKš\›××Ü›ÛÙÙ\Ü^N™ÜšYÙÜšY][\]KXÛÛ[[œÎœ™\X]
-ËYœŠ_Kœ›ÙXİŞÙÜšY][\]KXÛÛ[[œÎŒYœŸK\İ‹˜ÛÛZ[™\ÙÜšY][\]KXÛÛ[[œÎŒYœŸKšXY\‹XXİ[ÛœŞÙØ\Œ_CB‹œØK[ØØ[\šXÙ^Ù\Ü^N˜›ØÚÎÛX\™Ú[‹]ÜØÛÛÜˆÍM˜MÌÎÙ›Û\Ú^™N‹Í\™[NÙ›Û]ÙZYÚŒKœØKY[›İXÙHÜY[™Ë]ÜŒœZ[\Ü[ØÛÛÜˆÍM˜MÌßBYYXJ™Y™\œË\™YXÙY[[İ[Ûœ™YXÙJ^ÊÜØÜ›ÛX™Z]š[Ü˜]]ÈZ[\Ü[İ˜[œÚ][Û››Û™HZ[\Ü[_B
+- Railway deployment for commit `8335ea0` reported success.
+- Homepage, shop, shop-by-vehicle, cart, checkout, account, contact, about, shipping/returns, privacy/cookies, chargebacks, terms, search API, vehicle API, and health endpoint returned HTTP 200.
+- WooCommerce "Coming soon" protection was disabled in production.
+- Browser flow passed: public listing â†’ add product â†’ persistent cart â†’ shipping calculation â†’ checkout.
+- Cart displayed a USD subtotal, $35 standard shipping, and qualifying free shipping.
+- Checkout displayed exactly one required policy acceptance checkbox linking Terms, Privacy/Cookies, Shipping/Returns, and Payment/Chargebacks. Acceptance is versioned and recorded on the order.
+- Footer displayed Midax Plaza, Off Kangundo Rd, Nairobi, Kenya; +254 714 498 451; support@supremeautoparts.co.ke; WhatsApp; and contact-form routes.
+- Browser console produced no warnings or errors during final checkout inspection.
+- Catalog batch import is idempotent and resumes from its saved offset after deployment. At the last audit request, 3,407 products were live and the background importer was continuing toward all 17,529.
+
+## Payments
+
+PesaPal and TransactPay gateway implementations are present and fail closed. They only become available when their real Railway merchant variables exist. At final browser QA neither provider had merchant credentials configured, so checkout correctly showed no available payment method. A live payment redirect, callback, refund, and settlement cannot be validated without credentials issued by those providers; no credentials were invented or exposed.
+
+## Product images
+
+Every discovered product has at least one authorized real source-image mapping. The source image host currently answers Railway requests with an Incapsula HTML challenge (`text/html`) instead of image bytes. The importer validates `Content-Type: image/*` before sideloading and refuses the challenge response, preventing HTML from being stored as a JPEG. Source URLs remain attached as retryable metadata. No AI or synthetic product photographs are used.
+
+## Validation
+
+- JavaScript syntax/type checks passed.
+- PHP/JSON/config/branding/assets/responsive/Docker/env validation passed for 68 files.
+- Automated tests: 11 passed, 0 failed.
+- Git whitespace/diff checks passed.
+- GitHub push and Railway deployment succeeded.
+- Live route/status checks passed.
+- Browser product, cart, shipping, checkout, policy, footer, and console QA passed.
+
+## Operational notes
+
+- WooCommerce is the system of record for products, carts, customers, orders, coupons, taxes, shipping, and gateway settings.
+- Checkout and settlement currency is USD. Local-currency values are estimates only.
+- Administrator and provider secrets belong only in Railway variables and must never be committed, printed, or returned by a public endpoint.
+- Transactional email requires a production SMTP/email delivery provider before relying on the contact form or order emails.
+- Policy text is operational copy, not jurisdiction-specific legal advice; local counsel should approve it before high-volume trading.
