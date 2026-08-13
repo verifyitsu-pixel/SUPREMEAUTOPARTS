@@ -1,8 +1,11 @@
 # Supreme Autoparts — Production Audit
 
-Audit updated: 2026-08-13  
-Repository: `verifyitsu-pixel/SUPREMEAUTOPARTS`  
-Production: `https://www.supremeautoparts.co.ke/`  
+Audit updated: 2026-08-13
+
+Repository: `verifyitsu-pixel/SUPREMEAUTOPARTS`
+
+Production: `https://www.supremeautoparts.co.ke/`
+
 Deployment: Railway Docker service with managed MySQL and GitHub auto-deploy
 
 ## Result
