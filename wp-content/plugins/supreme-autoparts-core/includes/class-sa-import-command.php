@@ -3,6 +3,31 @@ defined( 'ABSPATH' ) || exit;
 
 /** Streaming, idempotent catalog importer. */
 final class SA_Import_Command {
+	/** Trash duplicate imported products while preserving one canonical record. */
+	public function deduplicate(): void {
+		global $wpdb;
+		$removed = 0;
+		$duplicate_skus = $wpdb->get_col( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE 'SA-%' GROUP BY meta_value HAVING COUNT(*) > 1" );
+		foreach ( $duplicate_skus as $sku ) {
+			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value = %s ORDER BY post_id ASC", $sku ) );
+			array_shift( $ids );
+			foreach ( $ids as $id ) { if ( wp_trash_post( (int) $id ) ) $removed++; }
+		}
+		$source_titles = array_column( $this->catalog_rows(), 'title' );
+		$unkeyed = get_posts( array( 'post_type' => 'product', 'post_status' => array( 'publish', 'draft', 'pending', 'private' ), 'meta_query' => array( 'relation' => 'OR', array( 'key' => '_sku', 'compare' => 'NOT EXISTS' ), array( 'key' => '_sku', 'value' => '' ) ), 'fields' => 'ids', 'posts_per_page' => -1 ) );
+		foreach ( $unkeyed as $id ) {
+			if ( in_array( get_the_title( $id ), $source_titles, true ) && wp_trash_post( (int) $id ) ) $removed++;
+		}
+		WP_CLI::success( sprintf( 'Moved %d duplicate catalog products to Trash.', $removed ) );
+	}
+
+	private function catalog_rows(): array {
+		$file = '/opt/supreme/data/products.csv'; $rows = array();
+		if ( ! is_readable( $file ) || ! ( $handle = fopen( $file, 'rb' ) ) ) return $rows;
+		$headers = fgetcsv( $handle );
+		while ( false !== ( $values = fgetcsv( $handle ) ) ) { $row = array_combine( $headers, $values ); $rows[] = $row; }
+		fclose( $handle ); return $rows;
+	}
 	/** Create the editable site pages, WooCommerce routes, menus, and product categories. */
 	public function setup(): void {
 		$pages = array(

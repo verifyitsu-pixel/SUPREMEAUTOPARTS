@@ -166,6 +166,7 @@ write_status "catalog-import-seed" false
     "${wp_cmd[@]}" option update sa_catalog_import_offset "$offset" >/dev/null
     sleep 2
   done
+  "${wp_cmd[@]}" supreme catalog deduplicate
   write_status "complete" true
 ) &
 

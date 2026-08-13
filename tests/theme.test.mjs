@@ -76,3 +76,11 @@ test('Railway catalog continuation uses bounded parallel batches', async () => {
   assert.match(bootstrap, /wait "\$import_pid"/);
   assert.match(bootstrap, /option update sa_catalog_import_offset/);
 });
+
+test('completed import performs recoverable duplicate cleanup', async () => {
+  const bootstrap = await read('deploy/supreme-bootstrap.sh');
+  const importer = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-import-command.php');
+  assert.match(bootstrap, /supreme catalog deduplicate/);
+  assert.match(importer, /wp_trash_post/);
+  assert.doesNotMatch(importer, /wp_delete_post/);
+});
