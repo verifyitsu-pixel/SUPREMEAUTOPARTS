@@ -58,6 +58,18 @@ php -r '
     }
     $statement->close();
   }
+  $permalink = "/%postname%/";
+  $sql = "INSERT INTO `{$prefix}options` (option_name, option_value, autoload) VALUES (\"permalink_structure\", ?, \"yes\") ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)";
+  $statement = $db->prepare($sql);
+  if (!$statement) {
+    exit(1);
+  }
+  $statement->bind_param("s", $permalink);
+  if (!$statement->execute()) {
+    exit(1);
+  }
+  $statement->close();
+  $db->query("DELETE FROM `{$prefix}options` WHERE option_name = \"rewrite_rules\"");
   $db->close();
 '
 
