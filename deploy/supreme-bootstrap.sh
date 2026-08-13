@@ -3,6 +3,12 @@ set -euo pipefail
 
 cd /var/www/html
 
+bootstrap_status=/tmp/supreme-bootstrap-status.json
+write_status() {
+  printf '{"stage":"%s","ok":%s}\n' "$1" "$2" > "$bootstrap_status"
+}
+write_status "starting" false
+
 # Apache and the official WordPress entrypoint create wp-config.php at runtime.
 # Wait for both that file and MySQL before performing the idempotent site setup.
 for attempt in $(seq 1 90); do
@@ -75,6 +81,13 @@ php -r '
 
 wp_cmd=(wp --allow-root --path=/var/www/html)
 
+write_status "linting" false
+php -l /var/www/html/wp-content/plugins/supreme-autoparts-core/supreme-autoparts-core.php >/dev/null
+for source_file in /var/www/html/wp-content/plugins/supreme-autoparts-core/includes/*.php /var/www/html/wp-content/themes/supreme-autoparts/*.php; do
+  php -l "$source_file" >/dev/null
+done
+write_status "install-check" false
+
 if ! "${wp_cmd[@]}" core is-installed >/dev/null 2>&1; then
   : "${WP_ADMIN_USER:=supremeadmin}"
   : "${WP_ADMIN_EMAIL:=calvin@supremeautoparts.co.ke}"
@@ -91,8 +104,11 @@ if ! "${wp_cmd[@]}" core is-installed >/dev/null 2>&1; then
     --skip-email
 fi
 
+write_status "plugin-activation" false
 "${wp_cmd[@]}" plugin activate woocommerce supreme-autoparts-core >/dev/null
+write_status "theme-activation" false
 "${wp_cmd[@]}" theme activate supreme-autoparts >/dev/null
+write_status "routing" false
 
 # Routing is deployment configuration, not one-time catalog state. Enforce it
 # on every release so an interrupted bootstrap cannot leave query-string URLs.
@@ -110,6 +126,7 @@ if "${wp_cmd[@]}" user get "$admin_user" --field=ID >/dev/null 2>&1; then
 fi
 
 if [[ "$("${wp_cmd[@]}" option get sa_bootstrap_complete 2>/dev/null || true)" != "1" ]]; then
+  write_status "catalog-setup" false
   "${wp_cmd[@]}" supreme catalog setup
   "${wp_cmd[@]}" option update sa_bootstrap_complete 1
 fi
@@ -119,7 +136,9 @@ fi
 # product pages, cart, and checkout are functional immediately.
 published_products="$("${wp_cmd[@]}" post list --post_type=product --post_status=publish --format=count 2>/dev/null || echo 0)"
 if [[ ! "$published_products" =~ ^[0-9]+$ ]] || (( published_products < 48 )); then
+  write_status "catalog-import" false
   "${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --limit=48 --status=publish
 fi
 
+write_status "complete" true
 echo "Supreme bootstrap: WordPress, WooCommerce, theme, and store pages are ready."

@@ -119,5 +119,13 @@ if ( false !== $failure_probe ) {
 	}
 }
 
+$bootstrap_probe = @file_get_contents( '/tmp/supreme-bootstrap-status.json' );
+if ( false !== $bootstrap_probe ) {
+	$bootstrap_probe = json_decode( $bootstrap_probe, true );
+	if ( is_array( $bootstrap_probe ) ) {
+		$response['bootstrap'] = $bootstrap_probe;
+	}
+}
+
 http_response_code( 'ok' === $response['status'] ? 200 : 503 );
 echo json_encode( $response, JSON_UNESCAPED_SLASHES );
