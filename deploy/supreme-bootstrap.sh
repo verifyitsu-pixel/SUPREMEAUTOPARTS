@@ -82,8 +82,11 @@ php -r '
 wp_cmd=(wp --allow-root --path=/var/www/html)
 
 write_status "linting" false
+write_status "lint-plugin-main" false
 php -l /var/www/html/wp-content/plugins/supreme-autoparts-core/supreme-autoparts-core.php >/dev/null
 for source_file in /var/www/html/wp-content/plugins/supreme-autoparts-core/includes/*.php /var/www/html/wp-content/themes/supreme-autoparts/*.php; do
+  lint_name="$(basename "$source_file" .php | tr -cd 'A-Za-z0-9_-')"
+  write_status "lint-${lint_name}" false
   php -l "$source_file" >/dev/null
 done
 write_status "install-check" false
