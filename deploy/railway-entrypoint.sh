@@ -36,6 +36,8 @@ mkdir -p /var/www/html/wp-content
 install -m 0644 /usr/src/wordpress/wp-content/db.php /var/www/html/wp-content/db.php
 install -m 0644 /usr/src/wordpress/wp-content/db-error.php /var/www/html/wp-content/db-error.php
 chown www-data:www-data /var/www/html/wp-content/db.php /var/www/html/wp-content/db-error.php
+install -m 0644 /usr/src/wordpress/.htaccess /var/www/html/.htaccess
+chown www-data:www-data /var/www/html/.htaccess
 
 # Finish WordPress/WooCommerce configuration after the official entrypoint has
 # created wp-config.php and Apache is accepting traffic.

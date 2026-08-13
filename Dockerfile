@@ -22,6 +22,7 @@ COPY wp-content/db-error.php /usr/src/wordpress/wp-content/db-error.php
 COPY data/products.csv data/vehicle-hierarchy.json /opt/supreme/data/
 COPY deploy/healthz.php /usr/src/wordpress/healthz.php
 COPY deploy/db-healthz.php /usr/src/wordpress/db-healthz.php
+COPY deploy/wordpress.htaccess /usr/src/wordpress/.htaccess
 COPY deploy/railway-entrypoint.sh /usr/local/bin/railway-entrypoint
 COPY deploy/supreme-bootstrap.sh /usr/local/bin/supreme-bootstrap
 COPY deploy/apache-security.conf /etc/apache2/conf-available/supreme-security.conf
