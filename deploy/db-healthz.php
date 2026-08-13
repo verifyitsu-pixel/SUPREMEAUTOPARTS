@@ -30,6 +30,7 @@ $response = array(
 	'db_dropin_current'  => file_exists( __DIR__ . '/wp-content/db.php' )
 		&& file_exists( '/usr/src/wordpress/wp-content/db.php' )
 		&& hash_file( 'sha256', __DIR__ . '/wp-content/db.php' ) === hash_file( 'sha256', '/usr/src/wordpress/wp-content/db.php' ),
+	'vehicle_data_exists' => is_readable( '/opt/supreme/data/vehicle-hierarchy.json' ),
 	'file_overrides_set' => array(
 		'host'     => false !== getenv( 'WORDPRESS_DB_HOST_FILE' ),
 		'user'     => false !== getenv( 'WORDPRESS_DB_USER_FILE' ),
@@ -37,6 +38,12 @@ $response = array(
 		'name'     => false !== getenv( 'WORDPRESS_DB_NAME_FILE' ),
 	),
 );
+
+if ( $response['vehicle_data_exists'] ) {
+	$vehicle_probe = json_decode( (string) @file_get_contents( '/opt/supreme/data/vehicle-hierarchy.json' ), true );
+	$response['vehicle_data_valid'] = is_array( $vehicle_probe ) && isset( $vehicle_probe['makes'] );
+	$response['vehicle_make_count'] = is_array( $vehicle_probe['makes'] ?? null ) ? count( $vehicle_probe['makes'] ) : 0;
+}
 
 if ( $response['configuration_set'] && $response['password_set'] ) {
 	mysqli_report( MYSQLI_REPORT_OFF );
