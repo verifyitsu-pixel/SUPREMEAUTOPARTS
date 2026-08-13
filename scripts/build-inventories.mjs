@@ -112,7 +112,7 @@ const hierarchy = [...vehicleNodes.values()].sort((a,b) => a.make.localeCompare(
   models: [...node.models.values()].sort((a,b) => a.model.localeCompare(b.model)).map(model => ({ model: model.model, years: [...model.years].sort((a,b) => a - b) })),
   model_count: node.models.size,
 }));
-await writeFile(new URL('vehicle-hierarchy.json', data), JSON.stringify({ generated_at: generatedAt, makes: hierarchy, make_count: hierarchy.length, model_count: hierarchy.reduce((n,m) => n + m.model_count, 0) }, null, 2) + '\n');
+await writeFile(new URL('vehicle-hierarchy.json', data), JSON.stringify({ generated_at: generatedAt, makes: hierarchy, make_count: hierarchy.length, model_count: hierarchy.reduce((n,m) => n + m.model_count, 0) }) + '\n');
 
 const redirects = all.map(row => ({ source_path: row.source_path, target_path: row.page_type === 'product' ? `/product/${row.source_path.split('/').filter(Boolean).at(-1)}/` : row.page_type === 'vehicle' ? `/vehicle/${row.source_path.split('/').filter(Boolean).at(-1)}/` : `/shop/` }));
 await writeFile(new URL('redirect-map.json', data), JSON.stringify({ generated_at: generatedAt, redirects }, null, 2) + '\n');
