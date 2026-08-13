@@ -9,7 +9,7 @@ final class SA_Brand {
 		'email'       => 'support@supremeautoparts.co.ke',
 		'hours'       => 'Mon–Sat, 8am–6pm EAT',
 		'address'     => 'Midax Plaza, Off Kangundo Rd, Nairobi, Kenya',
-		'site_url'    => 'https://supremeautoparts.com',
+		'site_url'    => 'https://www.supremeautoparts.co.ke',
 		'free_ship'   => 99,
 	);
 
@@ -31,5 +31,10 @@ final class SA_Brand {
 		$values = array();
 		foreach ( array_keys( self::DEFAULTS ) as $key ) $values[ $key ] = self::get( $key );
 		return $values;
+	}
+
+	public static function whatsapp_url( string $message = 'Hello Supreme Autoparts, I need help with a part.' ): string {
+		$number = preg_replace( '/\D+/', '', (string) self::get( 'phone' ) );
+		return 'https://wa.me/' . $number . '?text=' . rawurlencode( $message );
 	}
 }

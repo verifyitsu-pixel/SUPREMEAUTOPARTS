@@ -28,3 +28,24 @@ test('checkout remains gateway-neutral', async () => {
   assert.match(providers, /WC_Payment_Gateway/);
   assert.doesNotMatch(providers, /stripe|paypal|authorize\.net/i);
 });
+
+test('checkout requires and records store-policy acceptance', async () => {
+  const compliance = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-compliance.php');
+  const importer = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-import-command.php');
+  assert.match(compliance, /woocommerce_checkout_process/);
+  assert.match(compliance, /_sa_policy_acceptance_utc/);
+  assert.match(compliance, /Privacy & Cookie Policy/);
+  assert.match(compliance, /Payment & Chargeback Policy/);
+  assert.match(importer, /payment-chargebacks/);
+  assert.match(importer, /privacy-cookies/);
+});
+
+test('customer-care routes include WhatsApp, contact form, and business address', async () => {
+  const compliance = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-compliance.php');
+  const brand = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-brand.php');
+  const footer = await read('wp-content/themes/supreme-autoparts/footer.php');
+  assert.match(compliance, /sa_contact_form/);
+  assert.match(brand, /wa\.me/);
+  assert.match(brand, /Midax Plaza/);
+  assert.match(footer, /sa_brand\( 'address' \)/);
+});

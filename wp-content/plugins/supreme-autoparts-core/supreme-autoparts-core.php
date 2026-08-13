@@ -22,6 +22,7 @@ require_once SA_CORE_PATH . 'includes/class-sa-rest.php';
 require_once SA_CORE_PATH . 'includes/class-sa-admin.php';
 require_once SA_CORE_PATH . 'includes/class-sa-checkout-providers.php';
 require_once SA_CORE_PATH . 'includes/class-sa-local-pricing.php';
+require_once SA_CORE_PATH . 'includes/class-sa-compliance.php';
 
 final class Supreme_Autoparts_Core {
 	public static function init(): void {
@@ -31,6 +32,7 @@ final class Supreme_Autoparts_Core {
 		SA_Admin::init();
 		SA_Checkout_Providers::init();
 		SA_Local_Pricing::init();
+		SA_Compliance::init();
 		add_shortcode( 'sa_vehicle_selector', array( SA_Fitment::class, 'shortcode' ) );
 		add_action( 'before_woocommerce_init', array( self::class, 'declare_compatibility' ) );
 	}
