@@ -91,13 +91,14 @@ final class SA_Import_Command {
 			if ( empty( $row['source_id'] ) || empty( $row['title'] ) ) continue;
 			$count++;
 			if ( $dry ) continue;
-			$existing = get_posts( array( 'post_type' => 'product', 'post_status' => 'any', 'meta_key' => '_sa_source_id', 'meta_value' => sanitize_text_field( $row['source_id'] ), 'fields' => 'ids', 'posts_per_page' => 1 ) );
-			$product = $existing ? wc_get_product( $existing[0] ) : new WC_Product_Simple();
+			$sku = 'SA-' . sanitize_text_field( $row['source_id'] );
+			$existing_id = wc_get_product_id_by_sku( $sku );
+			$product = $existing_id ? wc_get_product( $existing_id ) : new WC_Product_Simple();
 			$product->set_name( sanitize_text_field( $row['title'] ) );
 			$product->set_slug( sanitize_title( $row['slug'] ) );
 			$product->set_status( $status );
 			$product->set_catalog_visibility( 'visible' );
-			$product->set_sku( 'SA-' . sanitize_text_field( $row['source_id'] ) );
+			$product->set_sku( $sku );
 			$price_record = isset( $verified_prices[ $row['source_id'] ] )
 				? array_merge( $verified_prices[ $row['source_id'] ], array( 'basis' => 'source-verified', 'confidence' => 'verified' ) )
 				: $this->estimate_price( $row['title'] );
@@ -114,7 +115,7 @@ final class SA_Import_Command {
 			$id = $product->save();
 			$this->assign_category( $id, $row['title'] );
 			$this->assign_fitment( $id, $row['title'] );
-			if ( $existing ) $updated++;
+			if ( $existing_id ) $updated++;
 			if ( $assets && ! has_post_thumbnail( $id ) && ! empty( $row['primary_image_url'] ) ) $this->sideload( $id, $row['primary_image_url'] );
 			if ( 0 === $count % 100 ) WP_CLI::log( "Processed {$count} rows..." );
 		}

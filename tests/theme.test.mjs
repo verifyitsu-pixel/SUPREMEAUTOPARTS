@@ -62,3 +62,9 @@ test('store setup configures shipping and avoids duplicate policy checkboxes', a
   assert.match(importer, /free_shipping/);
   assert.match(importer, /woocommerce_terms_page_id', 0/);
 });
+
+test('catalog updates use the WooCommerce SKU lookup table', async () => {
+  const importer = await read('wp-content/plugins/supreme-autoparts-core/includes/class-sa-import-command.php');
+  assert.match(importer, /wc_get_product_id_by_sku/);
+  assert.doesNotMatch(importer, /meta_key' => '_sa_source_id'/);
+});
