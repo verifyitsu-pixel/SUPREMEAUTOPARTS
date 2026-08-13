@@ -22,7 +22,9 @@ final class SA_Import_Command {
 		$ids = array();
 		foreach ( $pages as $slug => [ $title, $content ] ) {
 			$page = get_page_by_path( $slug );
-			$ids[ $slug ] = $page ? $page->ID : wp_insert_post( array( 'post_title' => $title, 'post_name' => $slug, 'post_content' => $content, 'post_status' => 'publish', 'post_type' => 'page' ) );
+			$record = array( 'post_title' => $title, 'post_name' => $slug, 'post_content' => $content, 'post_status' => 'publish', 'post_type' => 'page' );
+			if ( $page ) $record['ID'] = $page->ID;
+			$ids[ $slug ] = wp_insert_post( $record );
 		}
 		update_option( 'show_on_front', 'page' ); update_option( 'page_on_front', $ids['home'] );
 		update_option( 'woocommerce_shop_page_id', $ids['shop'] );

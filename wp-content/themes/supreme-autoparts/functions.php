@@ -53,8 +53,18 @@ function sa_schema(): void {
 add_action( 'wp_head', 'sa_schema', 20 );
 
 function sa_document_description(): void {
-	if ( ! is_front_page() ) return;
-	echo '<meta name="description" content="Shop performance lighting, towing mirrors, running boards, grilles, and truck accessories by year, make, and model at Supreme Autoparts.">';
+	if ( is_front_page() ) {
+		$description = 'Shop performance lighting, towing mirrors, running boards, grilles, and truck accessories by year, make, and model at Supreme Autoparts.';
+	} elseif ( is_singular( 'product' ) ) {
+		$description = 'Shop ' . single_post_title( '', false ) . ' in USD from Supreme Autoparts. Check vehicle fitment, availability, delivery, and secure checkout options.';
+	} elseif ( is_singular() ) {
+		$description = wp_strip_all_tags( get_the_excerpt() ?: get_the_title() . ' information from Supreme Autoparts.' );
+	} elseif ( function_exists( 'is_shop' ) && is_shop() ) {
+		$description = 'Browse the Supreme Autoparts catalog by category or vehicle make, model, and year.';
+	} else {
+		return;
+	}
+	echo '<meta name="description" content="' . esc_attr( wp_trim_words( $description, 28, '' ) ) . '">';
 }
 add_action( 'wp_head', 'sa_document_description', 2 );
 

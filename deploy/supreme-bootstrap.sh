@@ -128,11 +128,9 @@ if "${wp_cmd[@]}" user get "$admin_user" --field=ID >/dev/null 2>&1; then
   "${wp_cmd[@]}" "${update_args[@]}" >/dev/null
 fi
 
-if [[ "$("${wp_cmd[@]}" option get sa_bootstrap_complete 2>/dev/null || true)" != "1" ]]; then
-  write_status "catalog-setup" false
-  "${wp_cmd[@]}" supreme catalog setup
-  "${wp_cmd[@]}" option update sa_bootstrap_complete 1
-fi
+write_status "catalog-setup" false
+"${wp_cmd[@]}" supreme catalog setup
+"${wp_cmd[@]}" option update sa_bootstrap_complete 1
 
 # Seed a bounded, production-safe first catalog. The full normalized inventory
 # remains available for managed batch imports, while this ensures search,
