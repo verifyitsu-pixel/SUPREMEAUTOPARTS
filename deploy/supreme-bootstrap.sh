@@ -116,6 +116,9 @@ write_status "routing" false
 # Routing is deployment configuration, not one-time catalog state. Enforce it
 # on every release so an interrupted bootstrap cannot leave query-string URLs.
 "${wp_cmd[@]}" option update permalink_structure '/%postname%/' >/dev/null
+"${wp_cmd[@]}" option update woocommerce_coming_soon 'no' >/dev/null
+"${wp_cmd[@]}" option update woocommerce_store_pages_only 'no' >/dev/null
+"${wp_cmd[@]}" option update fresh_site '0' >/dev/null
 "${wp_cmd[@]}" rewrite flush --hard >/dev/null
 
 # Keep the requested administrator identity in sync without embedding a secret.

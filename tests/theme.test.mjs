@@ -49,3 +49,9 @@ test('customer-care routes include WhatsApp, contact form, and business address'
   assert.match(brand, /Midax Plaza/);
   assert.match(footer, /sa_brand\( 'address' \)/);
 });
+
+test('production bootstrap makes the WooCommerce storefront public', async () => {
+  const bootstrap = await read('deploy/supreme-bootstrap.sh');
+  assert.match(bootstrap, /option update woocommerce_coming_soon 'no'/);
+  assert.match(bootstrap, /option update fresh_site '0'/);
+});
