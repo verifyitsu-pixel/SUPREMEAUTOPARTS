@@ -9,6 +9,26 @@ final class SA_REST {
 		register_rest_route( 'supreme/v1', '/checkout-providers', array( 'methods' => 'GET', 'callback' => array( 'SA_Checkout_Providers', 'rest' ), 'permission_callback' => '__return_true' ) );
 	}
 	public static function vehicles( WP_REST_Request $request ): WP_REST_Response {
+		$hierarchy_file = '/opt/supreme/data/vehicle-hierarchy.json';
+		if ( is_readable( $hierarchy_file ) ) {
+			$hierarchy = json_decode( (string) file_get_contents( $hierarchy_file ), true );
+			$makes = is_array( $hierarchy['makes'] ?? null ) ? $hierarchy['makes'] : array();
+			$type = sanitize_key( (string) ( $request->get_param( 'taxonomy' ) ?: 'make' ) );
+			$make_slug = sanitize_title( (string) $request->get_param( 'make' ) );
+			$model_slug = sanitize_title( (string) $request->get_param( 'model' ) );
+			if ( 'make' === $type ) {
+				return new WP_REST_Response( array_map( static fn( $row ) => array( 'name' => $row['make'], 'slug' => sanitize_title( $row['make'] ) ), $makes ) );
+			}
+			$make = current( array_filter( $makes, static fn( $row ) => sanitize_title( $row['make'] ?? '' ) === $make_slug ) );
+			if ( ! is_array( $make ) ) return new WP_REST_Response( array() );
+			if ( 'model' === $type ) {
+				return new WP_REST_Response( array_map( static fn( $row ) => array( 'name' => $row['model'], 'slug' => sanitize_title( $row['model'] ) ), $make['models'] ?? array() ) );
+			}
+			if ( 'year' === $type ) {
+				$model = current( array_filter( $make['models'] ?? array(), static fn( $row ) => sanitize_title( $row['model'] ?? '' ) === $model_slug ) );
+				return new WP_REST_Response( is_array( $model ) ? array_values( $model['years'] ?? array() ) : array() );
+			}
+		}
 		$allowed = array( 'make' => 'sa_make', 'model' => 'sa_model', 'year' => 'sa_year' );
 		$key = $request->get_param( 'taxonomy' ) ?: 'make';
 		if ( ! isset( $allowed[ $key ] ) ) return new WP_REST_Response( array( 'message' => 'Invalid taxonomy.' ), 400 );

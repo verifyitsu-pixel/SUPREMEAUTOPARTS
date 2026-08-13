@@ -1,0 +1,8 @@
+{
+  "currency": "USD",
+  "verified_at": "2026-08-13",
+  "records": {
+    "100984": { "price": "99.99", "source_page": "https://www.topgearautosport.com/acura-integra" },
+    "100002": { "price": "169.99", "source_page": "https://www.topgearautosport.com/acura-integra-headlights" }
+  }
+}

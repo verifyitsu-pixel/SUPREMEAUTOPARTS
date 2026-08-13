@@ -19,7 +19,7 @@ COPY wp-content/plugins/supreme-autoparts-core/ /usr/src/wordpress/wp-content/pl
 COPY wp-content/mu-plugins/ /usr/src/wordpress/wp-content/mu-plugins/
 COPY wp-content/db.php /usr/src/wordpress/wp-content/db.php
 COPY wp-content/db-error.php /usr/src/wordpress/wp-content/db-error.php
-COPY data/products.csv data/vehicle-hierarchy.json /opt/supreme/data/
+COPY data/products.csv data/vehicle-hierarchy.json data/verified-prices.json /opt/supreme/data/
 COPY deploy/healthz.php /usr/src/wordpress/healthz.php
 COPY deploy/db-healthz.php /usr/src/wordpress/db-healthz.php
 COPY deploy/wordpress.htaccess /usr/src/wordpress/.htaccess

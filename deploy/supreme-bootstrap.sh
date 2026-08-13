@@ -137,11 +137,8 @@ fi
 # Seed a bounded, production-safe first catalog. The full normalized inventory
 # remains available for managed batch imports, while this ensures search,
 # product pages, cart, and checkout are functional immediately.
-published_products="$("${wp_cmd[@]}" post list --post_type=product --post_status=publish --format=count 2>/dev/null || echo 0)"
-if [[ ! "$published_products" =~ ^[0-9]+$ ]] || (( published_products < 48 )); then
-  write_status "catalog-import" false
-  "${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --limit=48 --status=publish
-fi
+write_status "catalog-import" false
+"${wp_cmd[@]}" supreme catalog import /opt/supreme/data/products.csv --limit=48 --status=publish
 
 write_status "complete" true
 echo "Supreme bootstrap: WordPress, WooCommerce, theme, and store pages are ready."

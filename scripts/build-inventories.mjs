@@ -92,15 +92,26 @@ const productHeader = ['source_id','slug','title','source_url','primary_image_ur
 const productRows = feeds.products.map(p => [p.source_id, p.source_path.split('/').filter(Boolean).at(-1), p.title, p.source_url, p.image_urls[0] || '', p.image_urls.length, p.last_modified]);
 await writeFile(new URL('products.csv', data), [productHeader, ...productRows].map(r => r.map(csv).join(',')).join('\n') + '\n');
 
-const makeModel = new Map();
+const vehicleNodes = new Map();
 for (const row of feeds.vehicles) {
-  const title = row.title.replace(/\s+Parts$/i, '');
-  const [make, ...modelParts] = title.split(' ');
-  const model = modelParts.join(' ');
-  if (!makeModel.has(make)) makeModel.set(make, new Set());
-  if (model) makeModel.get(make).add(model);
+  const slug = row.source_path.split('/').filter(Boolean).at(-1) || '';
+  const match = slug.match(/^(?:(19\d{2}|20\d{2})-)?([a-z0-9]+)(?:-(.+))?$/i);
+  if (!match) continue;
+  const [, year = '', makeSlug, modelSlug = ''] = match;
+  const make = slugTitle(`https://catalog.invalid/${makeSlug}`);
+  const model = modelSlug ? slugTitle(`https://catalog.invalid/${modelSlug}`) : '';
+  if (!vehicleNodes.has(makeSlug)) vehicleNodes.set(makeSlug, { make, models: new Map() });
+  if (model) {
+    const models = vehicleNodes.get(makeSlug).models;
+    if (!models.has(modelSlug)) models.set(modelSlug, { model, years: new Set() });
+    if (year) models.get(modelSlug).years.add(Number(year));
+  }
 }
-const hierarchy = [...makeModel].sort(([a],[b]) => a.localeCompare(b)).map(([make, models]) => ({ make, models: [...models].sort(), model_count: models.size }));
+const hierarchy = [...vehicleNodes.values()].sort((a,b) => a.make.localeCompare(b.make)).map(node => ({
+  make: node.make,
+  models: [...node.models.values()].sort((a,b) => a.model.localeCompare(b.model)).map(model => ({ model: model.model, years: [...model.years].sort((a,b) => a - b) })),
+  model_count: node.models.size,
+}));
 await writeFile(new URL('vehicle-hierarchy.json', data), JSON.stringify({ generated_at: generatedAt, makes: hierarchy, make_count: hierarchy.length, model_count: hierarchy.reduce((n,m) => n + m.model_count, 0) }, null, 2) + '\n');
 
 const redirects = all.map(row => ({ source_path: row.source_path, target_path: row.page_type === 'product' ? `/product/${row.source_path.split('/').filter(Boolean).at(-1)}/` : row.page_type === 'vehicle' ? `/vehicle/${row.source_path.split('/').filter(Boolean).at(-1)}/` : `/shop/` }));

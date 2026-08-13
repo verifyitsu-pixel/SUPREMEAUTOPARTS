@@ -56,6 +56,8 @@ final class SA_Import_Command {
 		$dry = isset( $assoc['dry-run'] );
 		$assets = isset( $assoc['include-assets'] );
 		$handle = fopen( $file, 'rb' );
+		$verified_prices = json_decode( (string) @file_get_contents( '/opt/supreme/data/verified-prices.json' ), true );
+		$verified_prices = is_array( $verified_prices['records'] ?? null ) ? $verified_prices['records'] : array();
 		$headers = fgetcsv( $handle );
 		$count = $skipped = $updated = 0;
 		while ( false !== ( $values = fgetcsv( $handle ) ) ) {
@@ -72,18 +74,42 @@ final class SA_Import_Command {
 			$product->set_status( $status );
 			$product->set_catalog_visibility( 'visible' );
 			$product->set_sku( 'SA-' . sanitize_text_field( $row['source_id'] ) );
-			$product->set_regular_price( '' );
+			$verified = $verified_prices[ $row['source_id'] ]['price'] ?? '';
+			$product->set_regular_price( is_numeric( $verified ) ? wc_format_decimal( $verified ) : '' );
 			$product->set_manage_stock( false );
 			$product->update_meta_data( '_sa_source_id', sanitize_text_field( $row['source_id'] ) );
 			$product->update_meta_data( '_sa_source_url', esc_url_raw( $row['source_url'] ) );
 			$product->update_meta_data( '_sa_imported_at', gmdate( 'c' ) );
 			$id = $product->save();
+			$this->assign_fitment( $id, $row['title'] );
 			if ( $existing ) $updated++;
 			if ( $assets && ! has_post_thumbnail( $id ) && ! empty( $row['primary_image_url'] ) ) $this->sideload( $id, $row['primary_image_url'] );
 			if ( 0 === $count % 100 ) WP_CLI::log( "Processed {$count} rows..." );
 		}
 		fclose( $handle );
 		WP_CLI::success( sprintf( '%s %d rows (%d updated).', $dry ? 'Validated' : 'Imported', $count, $updated ) );
+	}
+	private function assign_fitment( int $product_id, string $title ): void {
+		$hierarchy_file = '/opt/supreme/data/vehicle-hierarchy.json';
+		if ( ! is_readable( $hierarchy_file ) ) return;
+		$hierarchy = json_decode( (string) file_get_contents( $hierarchy_file ), true );
+		foreach ( $hierarchy['makes'] ?? array() as $make ) {
+			$make_name = (string) ( $make['make'] ?? '' );
+			if ( '' === $make_name || ! preg_match( '/^' . preg_quote( $make_name, '/' ) . '\s+(.+?)\s+(19\d{2}|20\d{2})(?:-(19\d{2}|20\d{2}))?\b/i', $title, $matches ) ) continue;
+			$model_text = trim( $matches[1] );
+			$models = $make['models'] ?? array();
+			usort( $models, static fn( $a, $b ) => strlen( $b['model'] ?? '' ) <=> strlen( $a['model'] ?? '' ) );
+			$model_name = $model_text;
+			foreach ( $models as $model ) {
+				if ( 0 === strcasecmp( substr( $model_text, -strlen( $model['model'] ) ), $model['model'] ) ) { $model_name = $model['model']; break; }
+			}
+			$start = (int) $matches[2]; $end = isset( $matches[3] ) && $matches[3] ? (int) $matches[3] : $start;
+			wp_set_object_terms( $product_id, $make_name, 'sa_make' );
+			wp_set_object_terms( $product_id, $model_name, 'sa_model' );
+			wp_set_object_terms( $product_id, array_map( 'strval', range( $start, min( $end, $start + 40 ) ) ), 'sa_year' );
+			update_post_meta( $product_id, '_sa_fitment_summary', sprintf( '%d%s %s %s', $start, $end > $start ? '-' . $end : '', $make_name, $model_name ) );
+			break;
+		}
 	}
 	private function sideload( int $product_id, string $url ): void {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
